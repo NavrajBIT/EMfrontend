@@ -1,15 +1,13 @@
-import { Text, ScrollView, View, Pressable, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
+import { Text, ScrollView, View, Pressable,  TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Icon from 'react-native-vector-icons/Entypo'
 import { PRIMARY_COLOR } from '../styles/style'
-import { Menu, CheckIcon, TextArea, FormControl, WarningOutlineIcon, Box, Center, NativeBaseProvider, Divider, Image, Button } from 'native-base'
-import { getPostById, verifyPost } from '../services/api'
+import {Input, Menu, CheckIcon, TextArea, FormControl,  WarningOutlineIcon, Box, Center, NativeBaseProvider, Divider, Image, Button } from 'native-base'
+import { commentApi, getPostById, verifyPost } from '../services/api'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { handleDate } from '../utils'
 import { env } from '../../env'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import CustomButton from '../components/Button/Button'
-import { isRejected } from '@reduxjs/toolkit'
 import { reactPost } from '../services/api'
 const PostDetails = ({ navigation, route }) => {
 
@@ -19,10 +17,14 @@ const PostDetails = ({ navigation, route }) => {
   const [isReject, setIsReject] = useState(false)
   const [rejectMessage, setRejectMessage] = useState("")
   const [rejectError, setRejectError] = useState(false)
+  const [comment, setComment] = useState("")
+  const [commentList, setCommentList] = useState([])
+  const [isCommented, setIsCommented] = useState(false)
 
   useEffect(() => {
     getPostDetails()
-  }, [])
+  }, [isCommented])
+
 
   const getPostDetails = async () => {
     setIsLoading(true);
@@ -34,7 +36,15 @@ const PostDetails = ({ navigation, route }) => {
       setPostDetails(response?.data)
     }
   }
-  console.log(userType)
+
+  const commentPost = async () =>{
+     const response = await commentApi(route?.params?.data?.id, comment)
+     if(response.status  === 201){
+       setComment("")
+       setIsCommented(true)
+        ToastAndroid.show('Comment Posted', ToastAndroid.LONG);  
+     }
+  }
 
   const approveRejectPost = async (status, status_message) => {
 
@@ -55,6 +65,7 @@ const PostDetails = ({ navigation, route }) => {
     }
 
   }
+  console.log(postDetails?.comments)
 
 
   const likeSharePost = async (status) => {
@@ -74,7 +85,7 @@ const PostDetails = ({ navigation, route }) => {
     </SafeAreaView>
   }
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1, marginBottom:20 }}>
       <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="chevron-left" size={30} color={PRIMARY_COLOR} />
@@ -87,20 +98,20 @@ const PostDetails = ({ navigation, route }) => {
             letterSpacing: 0.5,
             paddingRight: 12,
             color: 'black'
-          }}>{postDetails?.title}</Text>
+          }}>{postDetails?.title || "#NA#"}</Text>
         </Box>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%' }}>
         <View style={{ paddingHorizontal: 50, marginTop: 10 }}>
-          <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.created_at)}</Text>
-          <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.user?.name}`}</Text></Text>
+          <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.created_at) || "#NA#"}</Text>
+          <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.user?.name || "#NA#"}`}</Text></Text>
         </View>
         <View>
           <Icon name="thumbs-up" size={25} color={PRIMARY_COLOR} />
           <Text style={{
             fontSize: 10, color: PRIMARY_COLOR,
             textAlign: 'center'
-          }}>{postDetails?.likes}</Text>
+          }}>{postDetails?.likes || "0"}</Text>
         </View>
       </View>
      {   postDetails?.status === 2 && <View style={{paddingHorizontal:30, marginVertical:15}}>
@@ -130,12 +141,8 @@ const PostDetails = ({ navigation, route }) => {
         </Menu.Item>
       </Menu>
       </View>}
-      {postDetails?.display_picture ? <Image
+      {postDetails?.display_picture &&  <Image
         source={{ uri: `${env.imageUri}${postDetails?.display_picture}` }}
-        style={{ width: "100%", height: 200, marginTop: 10 }}
-        alt=""
-      /> : <Image
-        source={require('../../assets/images/Rectangle_6.jpg')}
         style={{ width: "100%", height: 200, marginTop: 10 }}
         alt=""
       />}
@@ -149,10 +156,37 @@ const PostDetails = ({ navigation, route }) => {
           color: 'black'
         }}>{postDetails?.description}</Text>
       </View>
-      <Text style={{ fontWeight: '400', paddingHorizontal: 40, lineHeight: 29, marginTop: 30 }}>
+      <Text style={{ fontWeight: '400', paddingHorizontal: 40, lineHeight: 29, marginTop: 30, color:'rgba(0,0,0,0.7)'}}>
         {postDetails?.content}
       </Text>
-      {(postDetails?.status === 1) && <View style={{
+      <View style={{flexDirection:'row', alignItems:'center', paddingHorizontal:30}}>
+        <Image source={require('../../assets/images/Rectangle_6.jpg')}
+        style={{width:45, height:45, borderRadius:50}}
+        alt=""
+        />
+        <Text style={{
+          fontWeight:'500',
+          color:'black',
+          marginLeft:15,
+          fontSize:16
+        }}>Press Trust of India</Text>
+        <TouchableOpacity style={{
+          backgroundColor:PRIMARY_COLOR,
+          paddingHorizontal:16,
+          paddingVertical:4,
+          borderRadius:5,
+          marginLeft:15
+        }}>
+            <Text style={{
+              fontWeight:'400',
+              color:'white',
+              fontSize:12
+            }}>Follow</Text>
+        </TouchableOpacity>
+      </View>
+      {(postDetails?.status === 1) &&
+      <>
+       <View style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginVertical: 30,
@@ -172,7 +206,67 @@ const PostDetails = ({ navigation, route }) => {
           }}>
           <Icon name="share" size={30} color={PRIMARY_COLOR} />
         </Button>
-      </View>}
+      </View>
+      </>
+      }
+      <View style={{
+        paddingHorizontal:30
+      }}>
+      <Box alignItems="center" mt={3}>
+      <FormControl>
+        <Input placeholder={"Comment"}
+          style={{ height: 46, fontSize: 12, color: 'rgba(0,0,0,0.5)' }}
+          onChangeText={e => {setIsCommented(false); setComment(e)}}
+          onSubmitEditing={()=> commentPost()}
+          value={comment}
+        />
+      </FormControl>
+    </Box>
+    <View style={{
+      flexDirection:'row',
+      alignItems:'center',
+      marginVertical:20,
+    }}>
+    <Text style={{
+      fontWeight:"500",
+      color:'#000000'
+    }}>Comments </Text>
+    <Text style={{
+      borderWidth:1,
+      paddingHorizontal:5,
+      borderRadius:5,
+      textAlign:'center',
+      color:PRIMARY_COLOR,
+      borderColor:PRIMARY_COLOR,
+    }}>{postDetails?.comments?.length}</Text>
+    </View>
+    {postDetails?.comments?.length > 0 && postDetails?.comments?.map(el =>{
+     return <View style={{
+      marginBottom:10
+     }}>
+          <Text style={{
+            color:PRIMARY_COLOR, 
+            fontSize:13,
+            fontWeight:400,
+            textAlign:'justify'
+          }}>{`@${el?.user?.name}`} <Text style={{
+            color:'black'
+          }}>{el?.content}</Text></Text>
+        </View>
+    }) 
+    }
+     {/* <Button variant="outline" width={"70%"}
+          style={{
+            borderWidth: 1, borderColor: "black"
+          }}
+          _text={{
+            color: 'black'
+          }}
+          onPress={() => approveRejectPost(1)}
+        >
+          View All Comments
+        </Button> */}
+    </View>
       {(userType === "2" && postDetails?.status === 0) && <><View style={{
         flexDirection: 'row',
         justifyContent: 'space-between',

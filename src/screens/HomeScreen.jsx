@@ -1,26 +1,40 @@
 import { Text, TextArea, View, Image, Pressable } from 'native-base'
-import React, { useLayoutEffect, useEffect, useContext } from 'react'
-import { useWindowDimensions, Dimensions, ToastAndroid, TouchableOpacity } from 'react-native';
+import React, { useLayoutEffect, useEffect, useContext, useState } from 'react'
+import { useWindowDimensions, Dimensions, ToastAndroid, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import ForYou from './home_tabs/ForYou';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 import { PRIMARY_COLOR } from '../styles/style';
+// import { category } from '../constant';
+import { getAllCategories } from '../services/api';
+import { CategoryContext } from '../context/categoryContext';
 
 function HomeScreen({ navigation }) {
 
-    const { login, setIsLoggedIn } = useContext(AuthContext)
+    const [status, setStatus] = useState("All")
+    
+    
+    
+    const { category } = useContext(CategoryContext)
+    
+    console.log(category, "cat")
+
 
     useEffect(() => {
         getToken()
+        
     }, [])
 
+    const { login, setIsLoggedIn } = useContext(AuthContext)
 
-    async function getToken() {
+    const getToken = async () => {
         setIsLoggedIn(await AsyncStorage.getItem('token'))
     }
 
+    
+  
 
     const handleNavigation = async () => {
         let token = await AsyncStorage.getItem('token')
@@ -30,7 +44,6 @@ function HomeScreen({ navigation }) {
         else {
             navigation.navigate('Login')
         }
-
     }
 
     async function handleUserNavigation() {
@@ -56,66 +69,89 @@ function HomeScreen({ navigation }) {
                     <Image source={require('../../assets/images/create.png')} alt="" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleNavigation} style={{ marginLeft: 10 }}>
-                    <Icon name="user" size={23} color={PRIMARY_COLOR} />
+                    <Image source={require('../../assets/images/profile.png')} alt="" style={{ width: 26, height: 26 }} />
                 </TouchableOpacity>
             </View>
         });
-    }, [navigation]);
-
-    const renderScene = SceneMap({
-        topnews: ForYou,
-        newregion: ForYou,
-        nePositive: ForYou,
-        videos: ForYou,
-
-    });
-
-    const renderTabBar = props => (
-        <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            backgroundColor: 'white',
-        }}>
-            <TabBar
-                {...props}
-                indicatorStyle={{ backgroundColor: "rgba(242, 73, 64, 0.5)" }}
-                style={{ backgroundColor: 'white', color: 'black', width: Dimensions.get('window').width - 35, elevation: 0 }}
-                labelStyle={{
-                    color: 'rgba(0, 0, 0, 0.4)',
-                    fontSize: 12,
-                    padding: 0,
-                    textTransform: 'capitalize'
-                }}
-                activeColor={'black'}
-
-            />
-            <Pressable onPress={async () => navigation.navigate('Category')}>
-                <Icon name="dots-three-vertical" size={20} style={{ marginLeft: 0 }} color="black" />
-            </Pressable>
-        </View>
-    );
-
-    const layout = useWindowDimensions();
-
-    const [index, setIndex] = React.useState(0);
-    const [routes] = React.useState([
-        { key: 'topnews', title: 'For You' },
-        { key: 'newregion', title: 'NE Region' },
-        { key: 'nePositive', title: 'NE Positive' },
-        { key: 'videos', title: 'Videos' },
-    ]);
+    }, []);
 
     return (
-        <TabView
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-            renderTabBar={renderTabBar}
-            swipeEnabled={false}
-            initialLayout={{ width: Dimensions.get('window').width }}
-        />
+
+        <SafeAreaView style={styles.container}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: "auto",
+                justifyContent: 'flex-start',
+                backgroundColor: 'white',
+            }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[{
+                    elevation: 5,
+                    shadowColor: 'black'
+                }]}>
+                    {category.length > 0 && category.map((e, i) => (
+                        <TouchableOpacity
+                            onPress={() => setStatus(e.name)}
+                            style={[
+                                styles.btnTab, status === e.name && styles.btnTabActive
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.textTab, status === e.name && styles.textTabActive
+                                ]}
+                            >
+                                {e.name}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+
+
+
+                </ScrollView>
+                <Pressable onPress={async () => navigation.navigate('Category')}>
+                    <Icon name="dots-three-vertical" size={20} style={{ marginRight: 15, padding: 10 }} color="black" />
+                </Pressable>
+            </View>
+            {
+                category.map((el) => {
+                    if (el.name === status) {
+                        return <ForYou item={el} />
+                    }
+                })
+            }
+        </SafeAreaView>
+
+
     );
 }
 
 export default HomeScreen
+const deviceWidth = Math.round(Dimensions.get('window').width)
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        flexDirection: "column"
+    },
+    btnTab: {
+        backgroundColor: "white",
+        width: 100,
+        height: 45,
+        textAlign: "center",
+        justifyContent: "center",
+    },
+    btnTabActive: {
+        borderBottomColor: PRIMARY_COLOR,
+        borderBottomWidth: 3
+    },
+    textTab: {
+        color: "rgba(0,0,0,0.4)",
+        textAlign: "center",
+        fontSize: 12,
+
+    },
+    textTabActive: {
+        color: "black",
+    },
+
+});

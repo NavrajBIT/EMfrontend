@@ -10,10 +10,10 @@ import UserPost from '../../components/Post/UserPost'
 import { getUserPost } from '../../services/api';
 import { PRIMARY_COLOR } from '../../styles/style';
 
-function Rejected() {
+function Posted() {
 
   const [post, setPost] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -21,28 +21,31 @@ function Rejected() {
   }, []);
 
   const getUserPostData = async  () =>{
-    const response = await getUserPost(1)
-     setPost(response.data)
+    setIsLoading(true)
+    const response = await getUserPost(1, offset)
+    if (response && response?.data?.length > 0) {
+        //After the response increasing the offset for the next API call.
+        setPost([...response.data]);
+        setIsLoading(false);
+    }
   }
-  const fetchMore = async () => {
-    if (isLoading) return;
 
-    setIsLoading(true);
+  const loadMoreItem = async () => {
+    setOffset(offset + 10);
+    const response = await getUserPost(1, offset)
+    if (response && response?.data?.length > 0) {
+        //After the response increasing the offset for the next API call.
+        setPost([...post, ...response.data]);
+    }
+};
 
-    const nextPage = currentPage + 1;
-    const newData = await getUserPost(0,10, nextPage);
 
-    setCurrentPage(nextPage);
-    setIsLoading(false);
-    setPost(prevData => [...prevData, ...newData]);
-  };
-
-  const renderItem = ({ item }) => {
-    return (<>
-      <UserPost data={item} />
-    </>
-    );
-  };
+const renderItem = ({ item }) => {
+  return (<View key={item.id}>
+    <UserPost data={item}/>
+    </View>
+  );
+};
 
   const renderLoader =() => <ActivityIndicator color={PRIMARY_COLOR} size="small"/>
 
@@ -56,13 +59,13 @@ function Rejected() {
         data={post}
         renderItem={renderItem}
         keyExtractor={item => item?.id?.toString()}
-        // onEndReached={fetchMore}
-        // onEndReachedThreshold={0.1}
-        // ListFooterComponent={renderLoader}
+        onEndReached={loadMoreItem}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={renderLoader}
       />: <Text style={{fontSize:16, fontWeight:'500', textAlign:'center', color:'black'}}>Posts not available...</Text>}
     </View>
   );
 
 }
 
-export default Rejected
+export default Posted

@@ -80,12 +80,10 @@ const Navigation = () => {
                 })}
             />
              <Stack.Screen name="Category" component={Category}
-                options={(navigation, route) => ({
-                    headerLeft: (props) => (<BackButton {...props} title={`Categories`} onPress={() => navigation.navigation.goBack()} />),
-                    title: "",
-                    headerShadowVisible: false,
-
-                })}
+             options={{
+                headerShown:false
+             }}
+            
             />
         </Stack.Navigator>
     )

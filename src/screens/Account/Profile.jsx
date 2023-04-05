@@ -95,7 +95,9 @@ function Profile({ navigation }) {
                             borderWidth: 1,
                             borderColor: PRIMARY_COLOR
                         }}>
-                            {profileData?.display_picture ? <Image source={{ uri: `${env.imageUri}${profileData?.display_picture}` }} alt="" /> : <Image source={require('../../../assets/images/profile_img.png')} alt="" />}
+                            {profileData?.display_picture ? <Image source={{ uri: `${env.imageUri}${profileData?.display_picture}` }} alt="" 
+                            style={{width:'100%', height:'100%', borderRadius:20}}
+                            /> : <Image source={require('../../../assets/images/profile_img.png')} alt="" />}
                         </View>
                         <View style={{
                             marginLeft: 15,
@@ -155,7 +157,7 @@ function Profile({ navigation }) {
                     </Menu>
 
                 </View>
-                <View style={{ flexDirection: 'row', marginTop: 23, justifyContent: 'space-around' }}>
+                {/* <View style={{ flexDirection: 'row', marginTop: 23, justifyContent: 'space-around' }}>
                     <View style={{
                         backgroundColor: 'white',
                         borderWidth: 1,
@@ -192,7 +194,7 @@ function Profile({ navigation }) {
                             fontWeight: 500
                         }}> Followings</Text>
                     </View>
-                </View>
+                </View> */}
             </View>
             <TabView
                 navigationState={{ index, routes }}

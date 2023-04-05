@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Dimensions,ActivityIndicator, SafeAreaView } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Dimensions, ActivityIndicator, SafeAreaView } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { ariaAttr, Divider, ScrollView } from 'native-base'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -8,63 +8,78 @@ import RectNewsCard from '../../components/Cards/RectNewsCard'
 import { useNavigation } from '@react-navigation/native'
 import Carousel from 'react-native-snap-carousel'
 import { getAllPost } from '../../services/api'
+import { useSelector } from 'react-redux'
+import { categoryState } from '../../features/categorySlice'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import PostDetails from '../PostDetails'
+
 
 const { width } = Dimensions.get("window");
 
-const ForYou = () => {
+const ForYou = ({ item }) => {
+    console.log(item, "item")
+
+   
 
     const [post, setPost] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [offset, setOffset] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [topNews, setTopNews] = useState([])
+
     const navigation = useNavigation()
+
 
     useEffect(() => {
         getUserPostData()
-    }, []);
+    }, [item]);
 
     const getUserPostData = async () => {
-        setIsLoading(true)
-        const response = await getAllPost()
-        setIsLoading(false)
-        console.log(response.data)
-        setPost(response?.data)
+        setIsLoading(true);
+        const response = await getAllPost(item.name, 0)
+        setIsLoading(false);
+        console.log(response, "response")
+        if (response && response?.data?.length > 0) {
+            //After the response increasing the offset for the next API call.
+            let topPost = response.data.length > 0 && response.data?.slice(0, 4);
+            setTopNews(topPost)
+            let finalPosts = response?.data.slice(4)
+            setPost([...finalPosts])
+            console.log(topNews.length)
+        }
     }
-    // const fetchMore = async () => {
-    //     if (isLoading) return;
 
-    //     setIsLoading(true);
-
-    //     const nextPage = currentPage + 1;
-    //     const newData = await getAllPost(2, 10, nextPage);
-
-    //     setCurrentPage(nextPage);
-    //     setIsLoading(false);
-    //     // setPost(prevData => [...prevData, ...newData]);
-    // };
+    const loadMoreItem = async () => {
+        setOffset(offset + 10);
+        const response = await getAllPost(item.name, offset)
+        if (response && response?.data?.length > 0) {
+            console.log(response)
+            //After the response increasing the offset for the next API call.
+            setPost([...post, ...response.data]);
+        }
+    };
 
     const renderItem = ({ item }) => {
         return (<>
-             <RectNewsCard data={item} />
+            <RectNewsCard data={item} />
         </>
         );
     };
-    const renderLoader =() => <ActivityIndicator color={PRIMARY_COLOR} size="small"/>
+    const renderLoader = () => <ActivityIndicator color={PRIMARY_COLOR} size="small" />
 
 
     if (isLoading) {
         return <SafeAreaView>
-          <ActivityIndicator size="large" color={PRIMARY_COLOR}
-            style={{
-              marginTop: 40
-            }}
-          />
+            <ActivityIndicator size="large" color={PRIMARY_COLOR}
+                style={{
+                    marginTop: 40
+                }}
+            />
         </SafeAreaView>
-      }
+    }
 
     return (<>
-        {post && post.length > 0 ?
-            <ScrollView style={styles.container}>
-                {/* <View style={{
+            {topNews.length > 0 ?   <ScrollView style={styles.container}>
+                <View style={{
                     flex: 1,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -78,21 +93,21 @@ const ForYou = () => {
 
                 </View>
 
-                <ScrollView horizontal>
-                    <SquareNewsCard />
-                    <SquareNewsCard />
-                    <SquareNewsCard />
-                    <SquareNewsCard />
-                </ScrollView> */}
+                <ScrollView horizontal style={{ marginBottom: 15 }}>
+                    {topNews.length > 0 && topNews.map(el => <SquareNewsCard data={el} />)}
+                </ScrollView>
+
                 <FlatList
                     data={post}
                     renderItem={renderItem}
-                    keyExtractor={item => item?.id?.toString()}
-                    // onEndReached={fetchMore}
-                    // onEndReachedThreshold={0.1}
-                    // ListFooterComponent={renderLoader}
-                /> 
-            </ScrollView> : <Text style={{ fontSize: 16,marginTop:30, fontWeight: '500', textAlign: 'center', color: 'black' }}>Posts not available...</Text>}
+                    keyExtractor={(item, index) => String(index)}
+                    onEndReached={loadMoreItem}
+                    onEndReachedThreshold={0}
+                    ListFooterComponent={renderLoader}
+                />
+            </ScrollView>
+            : <Text style={{ fontSize: 16, marginTop: 30, fontWeight: '500', textAlign: 'center', color: 'black' }}>Posts not available...</Text>}
+
     </>
     )
 }

@@ -109,11 +109,11 @@ export const createPost = async (formData)=> {
 };
 
 
-export const getUserPost = async (type, limit= "10", offset) =>{
+export const getUserPost = async (type, offset) =>{
   console.log(type)
   console.log(await AsyncStorage.getItem('token'))
   try {
-    const response = await fetch(`${env.url}/post/post?status=${type}&limit=${10}&offset=0`, {
+    const response = await fetch(`${env.url}/post/post?status=${type}&limit=10&offset=${offset}`, {
       method: 'GET',
       headers: {
         'Authorization': `Token ${await AsyncStorage.getItem('token')}`
@@ -127,15 +127,17 @@ export const getUserPost = async (type, limit= "10", offset) =>{
 }
 
 
-export const getAllPost = async () =>{
+export const getAllPost = async (category, offset) =>{
+  console.log(await AsyncStorage.getItem("token"))
+
+  let url = (category === 'All') ? `${env.url}/post/list?limit=10&offset=${offset}` : `${env.url}/post/list?category=${category}&limit=10&offset=${offset}`;
+  console.log(url)
   try {
-    const response = await fetch(`${env.url}/post/post`, {
+    const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': `Token ${await AsyncStorage.getItem('token')}`
-      },
     });
     let data = await response.json();
+    console.log(data)
     return data;
   } catch (error) {
     return error;
@@ -186,6 +188,40 @@ export const reactPost = async (id, type) =>{
         'Authorization': `Token ${await AsyncStorage.getItem('token')}`
       },
       body: JSON.stringify({type})
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }  
+}
+
+
+export const commentApi = async (id, content) =>{
+  try {
+    const response = await fetch(`${env.url}/post/post/${id}/comment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': `Token ${await AsyncStorage.getItem('token')}`
+      },
+      body: JSON.stringify({content})
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }  
+}
+
+
+export const getAllCategories = async () =>{
+  try {
+    const response = await fetch(`${env.url}/post/category`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Token ${await AsyncStorage.getItem('token')}`
+      },
     });
     let data = await response.json();
     return data;

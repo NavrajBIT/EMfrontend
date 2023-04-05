@@ -121,7 +121,7 @@ function PersonalDetails({ navigation, route }) {
           formData.append('pincode', values.pincode)
           formData.append('state', values.state)
           formData.append('city', values.city)
-          // formData.append('display_picture', finalImage)
+          formData.append('display_picture', finalImage)
           console.log(formData)
           const response = await registerUser(formData)
           console.log(response)

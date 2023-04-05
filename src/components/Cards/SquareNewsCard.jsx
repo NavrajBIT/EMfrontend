@@ -3,16 +3,18 @@ import React from 'react'
 import { Box, AspectRatio, Image, Center } from 'native-base'
 import LinearGradient from 'react-native-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
+import { env } from '../../../env'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { handleDate } from '../../utils'
 // import { ToastAndroid } from 'react-native/Libraries/Components/ToastAndroid/ToastAndroid'
 
-const SquareNewsCard = () => {
+const SquareNewsCard = ({data}) => {
     const navigation = useNavigation();
 
     async function handleNavigation() {
         let token = await AsyncStorage.getItem('token')
         if (token) {
-            navigation.navigate('PostDetails')
+            navigation.navigate('PostDetails', {data})
         } else {
             ToastAndroid.show('Please login first...', ToastAndroid.LONG)
             navigation.navigate('Login')
@@ -23,8 +25,15 @@ const SquareNewsCard = () => {
         <TouchableOpacity onPress={() => handleNavigation()}>
         <Box w="170" rounded="lg" overflow="hidden" mr="4">
             <AspectRatio w="170" ratio={1 / 1}>
-                <Image source={require('../../../assets/images/square_news_img.png')} alt="image"
-                    style={{ justifyContent: 'center', alignItems: 'center' }} />
+            { data?.display_picture ? <Image source={{uri: `${env.imageUri}${data?.display_picture}`}} alt="image" 
+                    width={"100%"}
+                    height={"100%"}
+                    /> : 
+                    <Image source={require('../../../assets/images/Rectangle_6.jpg')} alt="image" 
+                    width={"100%"}
+                    height={"100%"}
+                    />
+                    }
             </AspectRatio>
             <Box style={{
                 backgroundColor: 'rgba(0,0,0,0.4)',
@@ -39,7 +48,7 @@ const SquareNewsCard = () => {
                     fontWeight: '500',
                     lineHeight: 14,
                 }}>
-                    5th Time CM Neiphiu Rio, 1st Woman Cabinet Minister Others Sworn-In
+                   {data?.title}
                 </Text>
                 <View style={{
                     flexDirection: 'row',
@@ -50,12 +59,12 @@ const SquareNewsCard = () => {
                         fontWeight: '500',
                         fontSize: 9,
                         color: 'white'
-                    }}>Nagaland</Text>
+                    }}>{data?.location}</Text>
                     <Text style={{
                         fontWeight: '400',
                         fontSize: 9,
                         color: 'white'
-                    }}>Feb 13,2023</Text>
+                    }}>{handleDate(data?.created_at)}</Text>
                 </View>
             </Box>
         </Box>

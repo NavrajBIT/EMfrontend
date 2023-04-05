@@ -12,14 +12,25 @@ import { Select, CheckIcon, TextArea, FormControl, WarningOutlineIcon, Box, Cent
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import { useNavigation } from '@react-navigation/native'
-import { createPost } from '../services/api'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-function CreatePost() {
-  
+import { createPost, getAllCategories } from '../services/api'
 
+function CreatePost() {
     const [imageFile, setImageFile] = useState(null)
     const [imageError, setImageError] = useState(false)
+    const [category, setCategory] = useState([])
     const navigation = useNavigation()
+
+    useEffect(() => {
+        getCategory()
+      }, [])
+    
+
+    const getCategory = async () => {
+        const response = await getAllCategories();
+        if (response && response.data?.length > 0) {
+          setCategory(response?.data)
+        }
+      }
 
     //selecting file from gallery
     const handleChoosePhoto = async () => {
@@ -28,7 +39,7 @@ function CreatePost() {
                 type: [DocumentPicker.types.images]
             })
             console.log(res)
-            setImageFile(res[[0]])
+            setImageFile(res[0])
         }
         catch (err) {
             if (DocumentPicker.isCancel) {
@@ -95,22 +106,26 @@ function CreatePost() {
             }}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
-                // console.log(values)
-                // if (!imageFile) {
-                //     setImageError(true)
-                //     return;
-                // }
-                // else {
-                    let finalImage = imageFile && imageFile?.assets ? imageFile?.assets[0]  : imageFile
-                    console.log(finalImage)
+                console.log(values)
+                console.log(imageFile)
+                console.log(values)
+                if (!imageFile) {
+                    setImageError(true)
+                    return;
+                }
+                else {
+                    // let finalImage = imageFile && imageFile?.assets ? imageFile?.assets[0]  : imageFile
+                    
                     const formData = new FormData()
                     setImageError(false)
                     formData.append('title', values.title)
                     formData.append('description', values.description)
                     formData.append('content', values.content)
                     formData.append('location', values.location)
-                    formData.append('category', "test1")
-                    // formData.append('display_picture', finalImage)
+                    formData.append('category', values.category)
+                    formData.append('display_picture', imageFile)
+                    console.log("after pciture")
+
                     const response = await createPost(formData);
                     console.log(response)
                  if(response?.status === 201){
@@ -120,7 +135,7 @@ function CreatePost() {
                  else{
                     ToastAndroid.show(response?.message, ToastAndroid.LONG)
                  }
-                // }
+                }
 
             }}
         >
@@ -154,7 +169,7 @@ function CreatePost() {
                                     paddingVertical: 10
                                 }}
                             >
-                                <TouchableOpacity onPress={captureCamera}>
+                                <TouchableOpacity>
                                     <Icon name="camera" size={50} color={PRIMARY_COLOR} />
                                 </TouchableOpacity>
                                 <Button variant={"outline"}
@@ -228,8 +243,8 @@ function CreatePost() {
                                         bg: "teal.600",
                                         endIcon: <CheckIcon size={5} />
                                     }} mt="1">
-                                    <Select.Item label="Top news" value="topnews" />
-                                    <Select.Item label="Politics" value="politics" />
+                                    {category.length > 0 && category.map((el, index)  => <Select.Item label={el.name} value={el.name} key={index} />)}
+                                   
                                 </Select>
                                 <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
                                     Please make a selection!

@@ -12,8 +12,8 @@ import { PRIMARY_COLOR } from '../../styles/style';
 
 function Rejected() {
 
-  const [post, setPost] = useState([1, 2, 3]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [post, setPost] = useState([]);
+  const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -21,21 +21,23 @@ function Rejected() {
   }, []);
 
   const getUserPostData = async  () =>{
-    const response = await getUserPost(2)
-     setPost(response.data)
+    setIsLoading(true)
+    const response = await getUserPost(2, offset)
+    if (response && response?.data?.length > 0) {
+        //After the response increasing the offset for the next API call.
+        setPost([...response.data]);
+        setIsLoading(false);
+    }
   }
-  const fetchMore = async () => {
-    if (isLoading) return;
 
-    setIsLoading(true);
-
-    const nextPage = currentPage + 1;
-    const newData = await getUserPost(2,10, nextPage);
-
-    setCurrentPage(nextPage);
-    setIsLoading(false);
-    setPost(prevData => [...prevData, ...newData]);
-  };
+  const loadMoreItem = async () => {
+    setOffset(offset + 10);
+    const response = await getUserPost(2, offset)
+    if (response && response?.data?.length > 0) {
+        //After the response increasing the offset for the next API call.
+        setPost([...post, ...response.data]);
+    }
+};
 
   const renderItem = ({ item }) => {
     return (<>
@@ -56,9 +58,9 @@ function Rejected() {
         data={post}
         renderItem={renderItem}
         keyExtractor={item => item?.id?.toString()}
-        // onEndReached={fetchMore}
-        // onEndReachedThreshold={0.1}
-        // ListFooterComponent={renderLoader}
+        onEndReached={loadMoreItem}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={renderLoader}
       />: <Text style={{fontSize:16, fontWeight:'500', textAlign:'center', color:'black'}}>Posts not available...</Text>}
     </View>
   );
