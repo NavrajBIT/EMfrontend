@@ -32,11 +32,15 @@ function Pending() {
 
   const loadMoreItem = async () => {
     setOffset(offset + 10);
+    if(offset > 10){
     const response = await getUserPost(0, offset)
     if (response && response?.data?.length > 0) {
         //After the response increasing the offset for the next API call.
         setPost([...post, ...response.data]);
+    }else{
+      return;
     }
+  }
 };
 
  
@@ -58,7 +62,7 @@ function Pending() {
       {post && post.length > 0 ? <FlatList
         data={post}
         renderItem={renderItem}
-        keyExtractor={(item, index) => String(index)}
+        keyExtractor={(item, index) => String(item.id)}
         onEndReached={loadMoreItem}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderLoader}

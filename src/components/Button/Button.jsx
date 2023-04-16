@@ -1,12 +1,12 @@
 import React from 'react'
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet, Text,ActivityIndicator } from 'react-native'
 import { PRIMARY_COLOR } from '../../styles/style'
 import { Button } from 'native-base'
 
-function CustomButton({title, customStyle, customTextStyle, onPress}) {
+function CustomButton({title, customStyle, customTextStyle, isLoading, onPress}) {
     return (
-    <Button onPress={onPress} style={[styles.button, customStyle]}>
-     <Text style={[styles.buttonText, customTextStyle]}>{title}</Text>
+    <Button onPress={onPress} style={[styles.button, customStyle]} isDisabled={isLoading}>
+     {isLoading ? <ActivityIndicator color='white'/> : <Text style={[styles.buttonText, customTextStyle]}>{title}</Text>}
     </Button>
     )
 }

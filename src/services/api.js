@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { env } from '../../env';
 
 export const verifyOtp = async formData => {
-  console.log(`${env.url}/auth/login`)
   const response = await fetch(`${env.url}/auth/login`, {
     method: 'POST',
     headers: {
@@ -45,9 +44,7 @@ export const verifyEmailOtp = async formData => {
 
 
 export const registerUser = async (formData)=> {
-  console.log(formData)
   let token = await AsyncStorage.getItem('token')
-  console.log(token)
   const response = await fetch(`${env.url}/auth/user`, {
     method: 'PATCH',
     headers: {
@@ -77,7 +74,6 @@ export const getUserDetails = async () =>{
 }
 
 export const getProfileData = async () =>{
-  console.log(await AsyncStorage.getItem('token'))
   try {
     const response = await fetch(`${env.url}/auth/user`, {
       method: 'GET',
@@ -95,7 +91,6 @@ export const getProfileData = async () =>{
 
 export const createPost = async (formData)=> {
   let token = await AsyncStorage.getItem('token')
-  console.log(token)
   const response = await fetch(`${env.url}/post/post`, {
     method: 'POST',
     headers: {
@@ -110,13 +105,11 @@ export const createPost = async (formData)=> {
 
 
 export const getUserPost = async (type, offset) =>{
-  console.log(type)
-  console.log(await AsyncStorage.getItem('token'))
   try {
     const response = await fetch(`${env.url}/post/post?status=${type}&limit=10&offset=${offset}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Token ${await AsyncStorage.getItem('token')}`
+        'Authorization': `Token ${await AsyncStorage.getItem('token')}`,
       },
     });
     let data = await response.json();
@@ -128,16 +121,12 @@ export const getUserPost = async (type, offset) =>{
 
 
 export const getAllPost = async (category, offset) =>{
-  console.log(await AsyncStorage.getItem("token"))
-
   let url = (category === 'All') ? `${env.url}/post/list?limit=10&offset=${offset}` : `${env.url}/post/list?category=${category}&limit=10&offset=${offset}`;
-  console.log(url)
   try {
     const response = await fetch(url, {
       method: 'GET',
     });
     let data = await response.json();
-    console.log(data)
     return data;
   } catch (error) {
     return error;
@@ -161,15 +150,14 @@ export const getPostById = async (id) =>{
 }
 
 export const verifyPost = async (id, statuData) =>{
-  console.log(JSON.stringify(statuData))
   try {
     const response = await fetch(`${env.url}/post/post/${id}/verify`, {
       method: 'PATCH',
       headers: {
-        'Content-Type':'application/json',
+        'Content-Type':'multipart/form-data',
         'Authorization': `Token ${await AsyncStorage.getItem('token')}`
       },
-      body: JSON.stringify(statuData)
+      body: statuData
     });
     let data = await response.json();
     return data;
@@ -229,6 +217,21 @@ export const getAllCategories = async () =>{
     return error;
   }  
 }
+
+
+export const getAllLocation = async (type, state) =>{
+  let url = (state === "") ? `${env.url}/auth/location?list=${type}` : `${env.url}/auth/location?list=${type}&state=${state}`;
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }  
+}
+
 
 
 

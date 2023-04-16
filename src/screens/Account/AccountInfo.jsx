@@ -26,7 +26,6 @@ const AccountInfo = ({ navigation }) => {
                 onPress={async () => {
                     await AsyncStorage.clear();
                     navigation.navigate('Home')
-                    console.log('cleared');
                     ToastAndroid.show('User logged out', ToastAndroid.LONG)
                 }}
             />

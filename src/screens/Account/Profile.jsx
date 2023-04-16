@@ -1,5 +1,5 @@
 import { Image, Text, TextArea, View, Menu, Pressable, Button } from 'native-base'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect } from 'react'
 import { useWindowDimensions, Dimensions, TouchableOpacity, ToastAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
@@ -19,7 +19,6 @@ function Profile({ navigation }) {
     const [profileData, setProfileData] = useState([])
     const getUserData = async () => {
         const response = await getProfileData();
-        console.log(response)
         if (response.status === 200 && response?.data) {
             await AsyncStorage.setItem('user_type', JSON.stringify(response?.data?.user_type))
             setProfileData(response?.data)
@@ -37,6 +36,30 @@ function Profile({ navigation }) {
         rejected: Rejected,
 
     });
+
+    async function handleUserNavigation() {
+        let token = await AsyncStorage.getItem('token')
+        if (!token) {
+            navigation.navigate('Login')
+        } else {
+            navigation.navigate('CreatePost')
+        }
+    }
+
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => <View style={{
+                flexDirection: 'row', alignItems: "center"
+            }}>
+                <TouchableOpacity onPress={handleUserNavigation}>
+                    <Image source={require('../../../assets/images/create.png')} alt="" />
+                </TouchableOpacity>
+            </View>
+        });
+    }, []);
+
+    
 
     const renderTabBar = props => (
         <View style={{
@@ -146,7 +169,6 @@ function Profile({ navigation }) {
                                 onPress={async () => {
                                     await AsyncStorage.clear();
                                     navigation.navigate('Home')
-                                    console.log('cleared');
                                     ToastAndroid.show('User logged out', ToastAndroid.LONG)
                                 }}>
                                 Logout
@@ -156,46 +178,8 @@ function Profile({ navigation }) {
                         </Menu.Item>
                     </Menu>
 
-                </View>
-                {/* <View style={{ flexDirection: 'row', marginTop: 23, justifyContent: 'space-around' }}>
-                    <View style={{
-                        backgroundColor: 'white',
-                        borderWidth: 1,
-                        borderColor: 'rgba(0,0,0,0.3)',
-                        width: 140, flexDirection: 'row',
-                        justifyContent: 'center',
-                        borderRadius: 5,
-                        paddingVertical: 5,
-                    }} >
-                        <Text style={{
-                            fontSize: 18,
-                            fontWeight: 500
-
-                        }}>0</Text><Text Text style={{
-                            fontSize: 13,
-                            fontWeight: 500
-                        }}> Followers</Text>
-                    </View>
-                    <View style={{
-                        backgroundColor: 'white',
-                        borderWidth: 1,
-                        borderColor: 'rgba(0,0,0,0.3)',
-                        width: 140, flexDirection: 'row',
-                        justifyContent: 'center',
-                        borderRadius: 5,
-                        paddingVertical: 5,
-                    }} >
-                        <Text style={{
-                            fontSize: 18,
-                            fontWeight: 500
-
-                        }}>0</Text><Text Text style={{
-                            fontSize: 13,
-                            fontWeight: 500
-                        }}> Followings</Text>
-                    </View>
-                </View> */}
-            </View>
+               </View>
+             </View>
             <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}

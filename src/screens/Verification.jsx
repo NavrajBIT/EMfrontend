@@ -44,7 +44,6 @@ function Verification({ navigation, route }) {
         formData.append('otp', otp)
         formData.append('phone_number', `+91${route.params.number}`)
         let response = await verifyOtp(formData);
-        console.log(response)
         if (response && response.data?.token) {
             await AsyncStorage.setItem("token", response?.data?.token)
             await AsyncStorage.setItem("is_new", JSON.stringify(response?.data?.is_new))
@@ -65,14 +64,11 @@ function Verification({ navigation, route }) {
     //function to resend the Otp 
     const handleSubmit = async () => {
         setIsLoading(true)
-        const formData = new FormData();
-        formData.append('phone_number', `+91${route.params.number}`)
-        const response = await fetch(`${env.url}/auth/signin`, {
-            method: 'POST',
+        const response = await fetch(`${env.url}/auth/resend_otp?${route.params.number}`, {
+            method: 'GET',
             headers: {
-                "Content-Type": "multipart/form-data"
+                "Content-Type": "application/json"
             },
-            body: formData
         })
 
         let data = await response.json()

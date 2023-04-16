@@ -17,10 +17,6 @@ import PostDetails from '../PostDetails'
 const { width } = Dimensions.get("window");
 
 const ForYou = ({ item }) => {
-    console.log(item, "item")
-
-   
-
     const [post, setPost] = useState([]);
     const [offset, setOffset] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -37,14 +33,12 @@ const ForYou = ({ item }) => {
         setIsLoading(true);
         const response = await getAllPost(item.name, 0)
         setIsLoading(false);
-        console.log(response, "response")
         if (response && response?.data?.length > 0) {
             //After the response increasing the offset for the next API call.
             let topPost = response.data.length > 0 && response.data?.slice(0, 4);
             setTopNews(topPost)
             let finalPosts = response?.data.slice(4)
             setPost([...finalPosts])
-            console.log(topNews.length)
         }
     }
 
@@ -52,7 +46,6 @@ const ForYou = ({ item }) => {
         setOffset(offset + 10);
         const response = await getAllPost(item.name, offset)
         if (response && response?.data?.length > 0) {
-            console.log(response)
             //After the response increasing the offset for the next API call.
             setPost([...post, ...response.data]);
         }

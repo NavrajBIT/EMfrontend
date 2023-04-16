@@ -4,6 +4,7 @@ export const CategoryContext = createContext(null);
 
 
 export const CategoryContextProvider = ({ children }) => {
+    const  [activeTab, setActiveTab] = useState("All")
     const [category, setCategories] = useState([ {
         "name": "All",
         isChecked:true
@@ -21,7 +22,7 @@ export const CategoryContextProvider = ({ children }) => {
         isChecked:true
       },])
 
-    return <CategoryContext.Provider value={{category, setCategories}}>
+    return <CategoryContext.Provider value={{category, setCategories, activeTab, setActiveTab}}>
         {children}
     </CategoryContext.Provider>
 }

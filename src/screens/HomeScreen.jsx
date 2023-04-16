@@ -7,36 +7,24 @@ import ForYou from './home_tabs/ForYou';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 import { PRIMARY_COLOR } from '../styles/style';
-// import { category } from '../constant';
-import { getAllCategories } from '../services/api';
 import { CategoryContext } from '../context/categoryContext';
 
 function HomeScreen({ navigation }) {
 
-    const [status, setStatus] = useState("All")
-    
-    
-    
-    const { category } = useContext(CategoryContext)
-    
-    console.log(category, "cat")
 
+    const [status, setStatus] = useState("All")    
+    const {activeTab,setActiveTab, category } = useContext(CategoryContext)
 
     useEffect(() => {
-        getToken()
-        
+        getToken()        
     }, [])
 
     const { login, setIsLoggedIn } = useContext(AuthContext)
-
     const getToken = async () => {
         setIsLoggedIn(await AsyncStorage.getItem('token'))
     }
-
-    
-  
-
-    const handleNavigation = async () => {
+ 
+     const handleNavigation = async () => {
         let token = await AsyncStorage.getItem('token')
         if (token) {
             navigation.navigate('Profile')
@@ -91,14 +79,14 @@ function HomeScreen({ navigation }) {
                 }]}>
                     {category.length > 0 && category.map((e, i) => (
                         <TouchableOpacity
-                            onPress={() => setStatus(e.name)}
+                            onPress={() => setActiveTab(e.name)}
                             style={[
-                                styles.btnTab, status === e.name && styles.btnTabActive
+                                styles.btnTab, activeTab === e.name && styles.btnTabActive
                             ]}
                         >
                             <Text
                                 style={[
-                                    styles.textTab, status === e.name && styles.textTabActive
+                                    styles.textTab, activeTab === e.name && styles.textTabActive
                                 ]}
                             >
                                 {e.name}
@@ -115,7 +103,7 @@ function HomeScreen({ navigation }) {
             </View>
             {
                 category.map((el) => {
-                    if (el.name === status) {
+                    if (el.name === activeTab) {
                         return <ForYou item={el} />
                     }
                 })

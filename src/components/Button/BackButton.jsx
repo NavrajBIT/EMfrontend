@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/Entypo'
 import { Pressable } from 'native-base'
 
 const BackButton = ({props, title, onPress}) => {
-    console.log(props)
 
   return (
     <View style={{

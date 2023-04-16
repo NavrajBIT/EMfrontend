@@ -14,6 +14,7 @@ import { AuthContext } from '../context/AuthContext';
 import AccountInfo from '../screens/Account/AccountInfo';
 import CreatePost from '../screens/CreatePost';
 import Category from '../screens/Category';
+import Comment from '../screens/Comment';
 
 const Stack = createNativeStackNavigator()
 
@@ -82,8 +83,15 @@ const Navigation = () => {
              <Stack.Screen name="Category" component={Category}
              options={{
                 headerShown:false
-             }}
-            
+             }} 
+            />
+            <Stack.Screen name="Comments" component={Comment}
+             options={(navigation, route) => ({
+                headerLeft: (props) => (<BackButton {...props} title={`Comments`} onPress={() => navigation.navigation.goBack()} />),
+                title: "",
+                headerShadowVisible: false,
+
+            })}
             />
         </Stack.Navigator>
     )

@@ -2,30 +2,47 @@ import React, { useState, useEffect } from 'react'
 import { StyleSheet, ToastAndroid, View, TouchableOpacity } from 'react-native'
 import CustomInput from '../components/CustomInput/CustomInput'
 import CustomButton from '../components/Button/Button'
-import { Input, FormControl, Image, Text, Button, Box, Center, NativeBaseProvider } from "native-base";
-import { ScrollView } from 'react-native'
-import { Formik } from 'formik'
+import { Input, FormControl, WarningOutlineIcon, Image, Text, Button, Box, Select, CheckIcon } from "native-base";
+import { Formik, useField } from 'formik'
 import * as Yup from 'yup'
 import DocumentPicker from 'react-native-document-picker';
 import { launchCamera } from 'react-native-image-picker'
-import { registerUser } from '../services/api';
+import { getAllLocation, registerUser } from '../services/api';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Icon from 'react-native-vector-icons/Entypo'
 import { PRIMARY_COLOR } from '../styles/style';
+import { env } from '../../env';
 
 function PersonalDetails({ navigation, route }) {
-  // console.log(route.params.data)
 
   const [imageFile, setImageFile] = useState(null)
   const [imageError, setImageError] = useState(false)
+  const [stateList, setStateList] = useState([])
+  const [cityList, setCityList] = useState([])
+
   let userData = route?.params?.data
-  console.log(userData)
+
   useEffect(() => {
-    if (route.params?.data && route?.params?.data?.display_picture) {
-      setImageFile(route?.param?.data?.display_picture)
-    }
+    getAllState()
   }, [])
 
+  const getAllState = async () => {
+    const response = await getAllLocation('state', "")
+    if (response && response?.data.length > 0) {
+      setStateList([...response.data])
+    } else {
+      console.log(response)
+    }
+  }
+
+  const getCity = async (state) => {
+    const response = await getAllLocation('city', state)
+    if (response && response?.data.length > 0) {
+      setCityList([...response.data])
+    } else {
+      console.log(response)
+    }
+  }
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').min(2, 'Name must be greater than 2').max(20, 'name must be less than 20'),
@@ -43,7 +60,6 @@ function PersonalDetails({ navigation, route }) {
       const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.images]
       })
-      console.log(res)
       setImageFile(res[[0]])
     }
     catch (err) {
@@ -96,12 +112,12 @@ function PersonalDetails({ navigation, route }) {
   return (
     <Formik
       initialValues={{
-        name: "",
-        email: "",
-        address: "",
-        pincode: "",
-        city: "",
-        state: ""
+        name: userData?.name,
+        email: userData?.email,
+        address: userData?.address,
+        pincode: userData?.pincode,
+        city: userData?.city,
+        state: userData?.state
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
@@ -109,28 +125,24 @@ function PersonalDetails({ navigation, route }) {
           setImageError(true)
           return;
         }
-        else {
-          let finalImage = imageFile && imageFile?.assets ? 
-            {"fileName": imageFile?.assets[0]?.fileName, "fileSize": 197758,  "type": imageFile?.assets[0]?.type, "uri": imageFile?.assets[0]?.uri }
-           : imageFile
-          console.log(imageFile)
-          const formData = new FormData()
-          formData.append('name', values.name)
-          formData.append('email', values.email)
-          formData.append('address', values.address)
-          formData.append('pincode', values.pincode)
-          formData.append('state', values.state)
-          formData.append('city', values.city)
-          formData.append('display_picture', finalImage)
-          console.log(formData)
-          const response = await registerUser(formData)
-          console.log(response)
-          if (response && response?.status === 200) {
-            ToastAndroid.show(response?.message, ToastAndroid.LONG)
-            navigation.navigate('Home')
-          } else {
 
-          }
+        let finalImage = imageFile && imageFile?.assets ?
+          { "fileName": imageFile?.assets[0]?.fileName, "fileSize": 197758, "type": imageFile?.assets[0]?.type, "uri": imageFile?.assets[0]?.uri }
+          : imageFile
+        const formData = new FormData()
+        formData.append('name', values.name)
+        formData.append('email', values.email)
+        formData.append('address', values.address)
+        formData.append('pincode', values.pincode)
+        formData.append('state', values.state)
+        formData.append('city', values.city)
+        formData.append('display_picture', finalImage)
+        const response = await registerUser(formData)
+        if (response && response?.status === 200) {
+          ToastAndroid.show(response?.message, ToastAndroid.LONG)
+          navigation.navigate('Home')
+        } else {
+
         }
       }
       }
@@ -165,7 +177,7 @@ function PersonalDetails({ navigation, route }) {
                   paddingVertical: 10
                 }}
               >
-                <TouchableOpacity onPress={captureCamera}>
+                <TouchableOpacity onPress={() => console.log('Camera Triggered')}>
                   <Icon name="camera" size={50} color={PRIMARY_COLOR} />
                 </TouchableOpacity>
                 <Button variant={"outline"}
@@ -246,37 +258,51 @@ function PersonalDetails({ navigation, route }) {
               </FormControl>
             </Box>
             <Box alignItems="center" mt={3}>
-              <FormControl>
-                <Text style={{
-                  fontSize: 10,
-                  color: 'rgba(0,0,0,0.3)'
-                }}>{"City"}</Text>
-                <Input placeholder={"City"}
-                  style={styles.input}
-                  onChangeText={handleChange("city")}
-                  onBlur={handleBlur('city')}
-                  value={values.city}
-                />
-                {errors.city && touched.city && <Text style={styles.error}>
-                  {errors.city}
-                </Text>}
-              </FormControl>
-            </Box>
-            <Box alignItems="center" mt={3}>
-              <FormControl>
+              <FormControl isInvalid={errors.state && touched.state}>
                 <Text style={{
                   fontSize: 10,
                   color: 'rgba(0,0,0,0.3)'
                 }}>{"State"}</Text>
-                <Input placeholder={"State"}
-                  style={styles.input}
-                  onChangeText={handleChange("state")}
-                  onBlur={handleBlur('state')}
-                  value={values.state}
-                />
-                {errors.state && touched.state && <Text style={styles.error}>
-                  {errors.state}
-                </Text>}
+                <Select accessibilityLabel="Select Location" placeholder="Choose State"
+                  onValueChange={(e) => { handleChange('state')(e); getCity(e) }}
+                  defaultValue={userData.state}
+                  _selectedItem={{
+                    bg: "teal.600",
+                    endIcon: <CheckIcon size={5} />
+                  }} mt="1"
+                  style={[styles.input, { width: '100%' }]}
+                >
+                  {stateList.length > 0 && stateList.map((el, index) => {
+                    return <Select.Item label={el} value={el} key={index} />
+                  })}
+                </Select>
+                <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                  Please select a state
+                </FormControl.ErrorMessage>
+              </FormControl>
+            </Box>
+            <Box alignItems="center" mt={3}>
+              <FormControl isInvalid={errors.state && touched.state}>
+                <Text style={{
+                  fontSize: 10,
+                  color: 'rgba(0,0,0,0.3)'
+                }}>{"City"}</Text>
+                <Select accessibilityLabel="Select Location" placeholder="Choose City"
+                  onValueChange={(e) => { handleChange('city')(e); }}
+                  defaultValue={userData.city}
+                  _selectedItem={{
+                    bg: "teal.600",
+                    endIcon: <CheckIcon size={5} />
+                  }} mt="1"
+                  style={[styles.input, { width: '100%' }]}
+                >
+                  {cityList.length > 0 && cityList.map((el, index) => {
+                    return <Select.Item label={el} value={el} key={index} />
+                  })}
+                </Select>
+                <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                  Please select a state
+                </FormControl.ErrorMessage>
               </FormControl>
             </Box>
             <CustomButton title="Submit" customStyle={{ marginTop: 40, marginBottom: 40 }}
