@@ -46,6 +46,7 @@ const PostDetails = ({ navigation, route }) => {
     setIsLoading(true);
     setUserType(await AsyncStorage.getItem('user_type'))
     const response = await getPostById(route?.params?.data?.id);
+    console.log(response, "postDetails")
     setIsLoading(false)
     if (response.status === 200) {
       setCommentList(response?.data?.comments)
@@ -277,7 +278,7 @@ const PostDetails = ({ navigation, route }) => {
         }}>Press Trust of India</Text>
 
       </View>
-      {(postDetails?.status === 1) &&
+      {(postDetails?.status === 1 || postDetails?.status === 3) &&
         <>
           <View style={{
             flexDirection: 'row',

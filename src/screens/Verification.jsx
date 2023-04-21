@@ -64,7 +64,7 @@ function Verification({ navigation, route }) {
     //function to resend the Otp 
     const handleSubmit = async () => {
         setIsLoading(true)
-        const response = await fetch(`${env.url}/auth/resend_otp?${route.params.number}`, {
+        const response = await fetch(`${env.url}/auth/resend_otp?phone_number=${route.params.number}`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json"

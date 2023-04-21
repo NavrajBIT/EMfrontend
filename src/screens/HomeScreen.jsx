@@ -34,6 +34,17 @@ function HomeScreen({ navigation }) {
         }
     }
 
+    const handleCategoryNavigation = async () => {
+        let token = await AsyncStorage.getItem('token')
+        if (token) {
+            navigation.navigate('Category')
+        }
+        else {
+            navigation.navigate('Login')
+        }
+    }
+
+
     async function handleUserNavigation() {
         let token = await AsyncStorage.getItem('token')
         if (!token) {
@@ -97,7 +108,7 @@ function HomeScreen({ navigation }) {
 
 
                 </ScrollView>
-                <Pressable onPress={async () => navigation.navigate('Category')}>
+                <Pressable onPress={async () => handleCategoryNavigation()}>
                     <Icon name="dots-three-vertical" size={20} style={{ marginRight: 15, padding: 10 }} color="black" />
                 </Pressable>
             </View>

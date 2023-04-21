@@ -13,7 +13,6 @@ import { PRIMARY_COLOR } from '../styles/style';
 const Category = ({ navigation }) => {
 
   const [groupValue, setGroupValue] = React.useState([]);
-  const dispatch = useDispatch()
   const [categories, setCategory] = React.useState([])
   const { category, setCategories, setActiveTab } = useContext(CategoryContext)
   const [loading, setLoading] = React.useState(false)
