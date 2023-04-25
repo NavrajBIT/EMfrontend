@@ -156,8 +156,6 @@ function CreatePost() {
     }
 
     const validationSchema = Yup.object().shape({
-        title: Yup.string().required('Title is required'),
-        description: Yup.string().required('Description is required'),
         category: Yup.string().required('Category is required'),
         location: Yup.string().required('Location is required'),
     })
@@ -166,16 +164,13 @@ function CreatePost() {
         <Formik
             initialValues={{
                 title: "",
-                description:"",
+                description: "",
                 location: "",
                 category: ""
             }}
-            // validationSchema={validationSchema}
+            validationSchema={validationSchema}
             onSubmit={async (values) => {
-                if(!imageFile){
-                    setImageError(true)
-                    return;
-                }
+
                 setIsLoading(true)
                 const formData = new FormData()
 
@@ -199,6 +194,7 @@ function CreatePost() {
                     navigation.navigate('Home')
                 }
                 else {
+                    console.log(response)
                     ToastAndroid.show(response?.message, ToastAndroid.LONG)
                 }
 
@@ -245,6 +241,22 @@ function CreatePost() {
                                             marginTop: 15
                                         }}><Text style={{ color: PRIMARY_COLOR }}>Upload Thumbnail</Text></Button>
                                 </View>}
+                            {imageFile &&
+                                <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }} onPress={() => handleChoosePhoto()}>
+                                        <Icon name="edit" color="#2e8bc0" size={15} style={{ marginRight: 5 }} />
+                                        <Text style={{
+                                            color: '#2e8bc0',
+                                            textDecorationLine: 'underline',
+                                        }}>Change Image</Text></TouchableOpacity>
+                                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', }} onPress={() => setImageFile(null)}>
+                                        <Icon name="trash" color="#ff2e2e" size={15} style={{ marginRight: 5 }} />
+                                        <Text style={{
+                                            color: '#ff2e2e',
+                                            textDecorationLine: 'underline',
+                                        }}>Remove Image</Text></TouchableOpacity>
+                                </View>
+                            }
                             {imageError && <Text style={styles.error}>Please choose the Thumbnail</Text>}
                             <Box alignItems="center" style={{ marginTop: 25 }}>
                                 <FormControl isInvalid={errors.title && touched.title}>
@@ -306,14 +318,13 @@ function CreatePost() {
                                 </FormControl>
                             </Box>
                             <Box style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <FormControl w="45%" isInvalid={errors.category && touched.category}>
+                              <View>
                                     <FormControl.Label>Category</FormControl.Label>
-                                    <Select accessibilityLabel="Choose Service" placeholder="Select Category"
+                                    <Select placeholder="Select Category" minWidth={"150"}
                                         onValueChange={handleChange('category')}
-                                        _selectedItem={{
-                                            bg: "teal.600",
-                                            endIcon: <CheckIcon size={5} />
-                                        }} mt="1">
+                                        onBlur={handleBlur('category')}
+                                        selectedValue={values.category}
+                                            >
                                         {category.length > 0 && category.map((el, index) => {
                                             if (el.name === 'All') {
                                                 return;
@@ -322,13 +333,14 @@ function CreatePost() {
                                         })}
 
                                     </Select>
-                                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                                        Please make a selection!
-                                    </FormControl.ErrorMessage>
-                                </FormControl>
-                                <FormControl w="45%" isInvalid={errors.location && touched.location}>
+                                    {errors.category && touched.location && <Text style={{
+                                        fontSize:12, color:'red'
+                                    }}>Please select a category</Text>}
+                             </View>
+                               <View>
                                     <FormControl.Label>Location</FormControl.Label>
                                     <Select accessibilityLabel="Select Location" placeholder="Choose Service"
+                                    minWidth="150"
                                         onValueChange={handleChange('location')}
                                         _selectedItem={{
                                             bg: "teal.600",
@@ -339,10 +351,10 @@ function CreatePost() {
                                             return <Select.Item label={el} value={el} key={index} />
                                         })}
                                     </Select>
-                                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                                        Please make a selection!
-                                    </FormControl.ErrorMessage>
-                                </FormControl>
+                                    {errors.location && touched.location && <Text style={{
+                                        fontSize:12, color:'red'
+                                    }}>Please select a location</Text>}
+                               </View>
                             </Box>
                             <Box style={{ marginTop: 25, flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: "row", justifyContent: 'space-between', alignItems: "center", width: '100%' }}>
@@ -361,10 +373,10 @@ function CreatePost() {
                                 </View>
                             </Box>
                             {
-                                postDocument && postDocument.length > 0 ? postDocument.map((el, index) => <Box shadow="5" key={index} style={{paddingHorizontal:10, paddingVertical:10, marginTop: 20, padding: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: "center", borderRadius:5, backgroundColor: "#ACB4A0"}}>
-                                <Text style={{ color: "#252827", width:'80%' }}>{el.name}</Text>
-                                <TouchableOpacity onPress={() => deleteFile(index, 'post')}><Icon name="trash" size={20} color="#EF3340" /></TouchableOpacity>
-                              </Box>)
+                                postDocument && postDocument.length > 0 ? postDocument.map((el, index) => <Box shadow="5" key={index} style={{ paddingHorizontal: 10, paddingVertical: 10, marginTop: 20, padding: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: "center", borderRadius: 5, backgroundColor: "#ACB4A0" }}>
+                                    <Text style={{ color: "#252827", width: '80%' }}>{el.name}</Text>
+                                    <TouchableOpacity onPress={() => deleteFile(index, 'post')}><Icon name="trash" size={20} color="#EF3340" /></TouchableOpacity>
+                                </Box>)
 
                                     :
                                     <View style={{ height: 20, marginTop: 10, marginBottom: 20 }}><Text style={{ color: 'black', fontWeight: '600', textAlign: 'center', }}>Please select files to upload</Text>
@@ -389,10 +401,10 @@ function CreatePost() {
                             </Box>
                             {
                                 proofDocument && proofDocument.length > 0 ?
-                                    proofDocument.map((el, index) => <Box shadow="5" key={index} style={{paddingHorizontal:10, paddingVertical:10, marginTop: 20, padding: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: "center", borderRadius:5, backgroundColor: "#ACB4A0"}}>
-                                    <Text style={{ color: "#252827", width:'80%' }}>{el.name}</Text>
-                                    <TouchableOpacity onPress={() => deleteFile(index, '')}><Icon name="trash" size={20} color="#EF3340" /></TouchableOpacity>
-                                  </Box>)
+                                    proofDocument.map((el, index) => <Box shadow="5" key={index} style={{ paddingHorizontal: 10, paddingVertical: 10, marginTop: 20, padding: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: "center", borderRadius: 5, backgroundColor: "#ACB4A0" }}>
+                                        <Text style={{ color: "#252827", width: '80%' }}>{el.name}</Text>
+                                        <TouchableOpacity onPress={() => deleteFile(index, '')}><Icon name="trash" size={20} color="#EF3340" /></TouchableOpacity>
+                                    </Box>)
                                     :
                                     <View style={{ height: 20, marginVertical: 10 }}><Text style={{ color: 'black', fontWeight: '600', textAlign: 'center', }}>Please select files to upload</Text>
                                     </View>
@@ -400,7 +412,6 @@ function CreatePost() {
                             <CustomButton title={"Submit"} isLoading={isLoading} customStyle={{ zIndex: 10, width: '100%', alignSelf: 'center', marginVertical: 30 }}
                                 onPress={() => handleSubmit()}
                             />
-
 
                         </KeyboardAwareScrollView>
 

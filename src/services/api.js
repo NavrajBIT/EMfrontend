@@ -44,6 +44,7 @@ export const verifyEmailOtp = async formData => {
 
 
 export const registerUser = async (formData)=> {
+  console.log(formData)
   let token = await AsyncStorage.getItem('token')
   const response = await fetch(`${env.url}/auth/user`, {
     method: 'PATCH',
@@ -120,8 +121,14 @@ export const getUserPost = async (type, offset) =>{
 }
 
 
-export const getAllPost = async (category, offset) =>{
+export const getAllPost = async (category, offset, location) =>{
   let url = (category === 'All') ? `${env.url}/post/list?limit=10&offset=${offset}` : `${env.url}/post/list?category=${category}&limit=10&offset=${offset}`;
+  
+  if(location !=='all'){
+    url =  `${url}&location=${location}`
+  }
+
+  console.log(url)
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -204,6 +211,7 @@ export const commentApi = async (id, content) =>{
 
 
 export const getAllCategories = async () =>{
+  console.log(await AsyncStorage.getItem('token'))
   try {
     const response = await fetch(`${env.url}/post/category`, {
       method: 'GET',
@@ -220,12 +228,15 @@ export const getAllCategories = async () =>{
 
 
 export const getAllLocation = async (type, state) =>{
+  console.log(type)
   let url = (state === "") ? `${env.url}/auth/location?list=${type}` : `${env.url}/auth/location?list=${type}&state=${state}`;
+  console.log(url)
   try {
     const response = await fetch(url, {
       method: 'GET',
     });
     let data = await response.json();
+    console.log(data)
     return data;
   } catch (error) {
     return error;

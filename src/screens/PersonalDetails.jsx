@@ -19,6 +19,7 @@ function PersonalDetails({ navigation, route }) {
   const [imageError, setImageError] = useState(false)
   const [stateList, setStateList] = useState([])
   const [cityList, setCityList] = useState([])
+  const [loading, setIsLoading] = useState(false)
 
   let userData = route?.params?.data
 
@@ -112,20 +113,16 @@ function PersonalDetails({ navigation, route }) {
   return (
     <Formik
       initialValues={{
-        name: userData?.name,
-        email: userData?.email,
-        address: userData?.address,
-        pincode: userData?.pincode,
-        city: userData?.city,
-        state: userData?.state
+        name: userData?.name || "",
+        email: userData?.email || "",
+        address: userData?.address || "",
+        pincode: userData?.pincode || "",
+        city: userData?.city || "",
+        state: userData?.state || ""
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        if (!imageFile) {
-          setImageError(true)
-          return;
-        }
-
+        setIsLoading(true)
         let finalImage = imageFile && imageFile?.assets ?
           { "fileName": imageFile?.assets[0]?.fileName, "fileSize": 197758, "type": imageFile?.assets[0]?.type, "uri": imageFile?.assets[0]?.uri }
           : imageFile
@@ -136,8 +133,15 @@ function PersonalDetails({ navigation, route }) {
         formData.append('pincode', values.pincode)
         formData.append('state', values.state)
         formData.append('city', values.city)
+        if(finalImage !== null){
         formData.append('display_picture', finalImage)
+        }
+        else if(finalImage === null){
+          formData.append('display_picture', "")
+        }
         const response = await registerUser(formData)
+        setIsLoading(false)
+        console.log(response)
         if (response && response?.status === 200) {
           ToastAndroid.show(response?.message, ToastAndroid.LONG)
           navigation.navigate('Home')
@@ -187,8 +191,24 @@ function PersonalDetails({ navigation, route }) {
                     marginTop: 15
                   }}><Text style={{ color: PRIMARY_COLOR }}>Upload Profile Picture</Text></Button>
               </View>}
+            {imageFile &&
+              <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }} onPress={() => handleChoosePhoto()}>
+                  <Icon name="edit" color="#2e8bc0" size={15} style={{ marginRight: 5 }} />
+                  <Text style={{
+                    color: '#2e8bc0',
+                    textDecorationLine: 'underline',
+                  }}>Change Image</Text></TouchableOpacity>
+                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', }} onPress={() => setImageFile(null)}>
+                  <Icon name="trash" color="#ff2e2e" size={15} style={{ marginRight: 5 }} />
+                  <Text style={{
+                    color: '#ff2e2e',
+                    textDecorationLine: 'underline',
+                  }}>Remove Image</Text></TouchableOpacity>
+              </View>
+            }
             {imageError && <Text style={styles.error}>Please upload the profile picture</Text>}
-            <Box alignItems="center" mt={6}>
+            <Box alignItems="center" mt={4}>
               <FormControl>
                 <Text style={{
                   fontSize: 10,
@@ -258,14 +278,14 @@ function PersonalDetails({ navigation, route }) {
               </FormControl>
             </Box>
             <Box alignItems="center" mt={3}>
-              <FormControl isInvalid={errors.state && touched.state}>
+              <View style={{width:'100%'}}>
                 <Text style={{
                   fontSize: 10,
                   color: 'rgba(0,0,0,0.3)'
                 }}>{"State"}</Text>
                 <Select accessibilityLabel="Select Location" placeholder="Choose State"
+                  width={"100%"}
                   onValueChange={(e) => { handleChange('state')(e); getCity(e) }}
-                  defaultValue={userData.state}
                   _selectedItem={{
                     bg: "teal.600",
                     endIcon: <CheckIcon size={5} />
@@ -276,20 +296,20 @@ function PersonalDetails({ navigation, route }) {
                     return <Select.Item label={el} value={el} key={index} />
                   })}
                 </Select>
-                <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                  Please select a state
-                </FormControl.ErrorMessage>
-              </FormControl>
+                {errors.state && touched.state && <Text style={{
+                  fontSize: 12, color: 'red'
+                }}>Plaese select a State</Text>}
+              </View>
             </Box>
-            <Box alignItems="center" mt={3}>
-              <FormControl isInvalid={errors.state && touched.state}>
+            <Box alignItems="center" mt={3} width="100%">
+              <View style={{width:'100%'}}>
                 <Text style={{
                   fontSize: 10,
                   color: 'rgba(0,0,0,0.3)'
                 }}>{"City"}</Text>
                 <Select accessibilityLabel="Select Location" placeholder="Choose City"
                   onValueChange={(e) => { handleChange('city')(e); }}
-                  defaultValue={userData.city}
+                  width="100%"
                   _selectedItem={{
                     bg: "teal.600",
                     endIcon: <CheckIcon size={5} />
@@ -300,13 +320,14 @@ function PersonalDetails({ navigation, route }) {
                     return <Select.Item label={el} value={el} key={index} />
                   })}
                 </Select>
-                <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                  Please select a state
-                </FormControl.ErrorMessage>
-              </FormControl>
+                {errors.city && touched.city && <Text style={{
+                  fontSize: 12, color: 'red'
+                }}>Plaese select a City</Text>}
+              </View>
             </Box>
             <CustomButton title="Submit" customStyle={{ marginTop: 40, marginBottom: 40 }}
               onPress={handleSubmit}
+              isLoading={loading}
             />
           </KeyboardAwareScrollView>
         </>)}

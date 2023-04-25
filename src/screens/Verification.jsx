@@ -40,10 +40,12 @@ function Verification({ navigation, route }) {
 
     //function to verify the OTP
     const handleVerifyOtp = async () => {
+        setIsLoading(true)
         const formData = new FormData();
         formData.append('otp', otp)
         formData.append('phone_number', `+91${route.params.number}`)
         let response = await verifyOtp(formData);
+        setIsLoading(false)
         if (response && response.data?.token) {
             await AsyncStorage.setItem("token", response?.data?.token)
             await AsyncStorage.setItem("is_new", JSON.stringify(response?.data?.is_new))
@@ -118,6 +120,7 @@ function Verification({ navigation, route }) {
             }}>Paste verification code here</Text>
         </View>
         <CustomButton title={"Verify"} customStyle={otp.length === 6 ? styles.button : styles.disabledButton} disabled={otp.length < 6}
+        isLoading={loading}
             onPress={() => handleVerifyOtp()} />
         {<TouchableOpacity style={{ marginTop: 20 }} onPress={() => { setCount(60); setOtp(''); handleSubmit()}}
             disabled={count !== 0}

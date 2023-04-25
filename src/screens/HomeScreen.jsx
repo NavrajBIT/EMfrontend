@@ -45,14 +45,7 @@ function HomeScreen({ navigation }) {
     }
 
 
-    async function handleUserNavigation() {
-        let token = await AsyncStorage.getItem('token')
-        if (!token) {
-            navigation.navigate('Login')
-        } else {
-            navigation.navigate('CreatePost')
-        }
-    }
+  
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -64,9 +57,6 @@ function HomeScreen({ navigation }) {
             headerRight: () => <View style={{
                 flexDirection: 'row', alignItems: "center"
             }}>
-                <TouchableOpacity onPress={handleUserNavigation}>
-                    <Image source={require('../../assets/images/create.png')} alt="" />
-                </TouchableOpacity>
                 <TouchableOpacity onPress={handleNavigation} style={{ marginLeft: 10 }}>
                     <Image source={require('../../assets/images/profile.png')} alt="" style={{ width: 26, height: 26 }} />
                 </TouchableOpacity>

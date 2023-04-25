@@ -1,14 +1,12 @@
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useContext, useEffect, useLayoutEffect } from 'react'
 import { Checkbox } from 'native-base'
-import { useDispatch, useSelector } from 'react-redux';
-import { addCategories, removeCategories } from '../features/categorySlice';
-import { categoryState } from '../features/categorySlice';
 import { getAllCategories } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CategoryContext } from '../context/categoryContext';
 import BackButton from '../components/Button/BackButton';
 import { PRIMARY_COLOR } from '../styles/style';
+import Icon from 'react-native-vector-icons/Entypo'
 
 const Category = ({ navigation }) => {
 
@@ -37,6 +35,15 @@ const Category = ({ navigation }) => {
       setCategory(response?.data)
     }
   }
+
+    async function handleUserNavigation() {
+        let token = await AsyncStorage.getItem('token')
+        if (!token) {
+            navigation.navigate('Login')
+        } else {
+            navigation.navigate('CreatePost')
+        }
+    }
 
   return (
     <>
@@ -88,6 +95,26 @@ const Category = ({ navigation }) => {
         </View>
       </View>
         }
+         <TouchableOpacity
+                onPress={() => handleUserNavigation()}
+                style={[{
+                    width: 50,
+                    height: 50,
+                    borderColor: PRIMARY_COLOR,
+                    borderRadius: 30,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#f5f5f5',
+                    borderWidth: 2,
+                    position: "absolute",
+                    bottom: 20,
+                    right: 20,
+                    zIndex: 2
+                }, {
+                    elevation: 5, shadowColor: 'black'
+                }]}>
+                <Icon name="plus" size={25} color={PRIMARY_COLOR} />
+            </TouchableOpacity>
     </>
   )
 }

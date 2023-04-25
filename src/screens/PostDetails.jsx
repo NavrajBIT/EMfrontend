@@ -153,10 +153,30 @@ const PostDetails = ({ navigation, route }) => {
       />
     </SafeAreaView>
   }
-  return (
+  return (<>
+    <TouchableOpacity
+      onPress={() => handleUserNavigation()}
+      style={[{
+        width: 50,
+        height: 50,
+        borderColor: PRIMARY_COLOR,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+        borderWidth: 2,
+        position: "absolute",
+        bottom: 20,
+        right: 20,
+        zIndex: 2
+      }, {
+        elevation: 5, shadowColor: 'black'
+      }]}>
+      <Icon name="plus" size={25} color={PRIMARY_COLOR} />
+    </TouchableOpacity>
     <ScrollView style={{ flex: 1, marginBottom: 20 }}>
       <View style={{ flexDirection: 'row', marginTop: 20, paddingHorizontal: 10, justifyContent: 'space-between', alignItems: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%' }}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="chevron-left" size={30} color={PRIMARY_COLOR} />
           </TouchableOpacity>
@@ -171,26 +191,30 @@ const PostDetails = ({ navigation, route }) => {
             }}>{postDetails?.title || "#NA#"}</Text>
           </Box>
         </View>
-        <View>
-          <TouchableOpacity onPress={handleUserNavigation}>
-            <Image source={require('../../assets/images/create.png')} alt="" />
-          </TouchableOpacity>
-        </View>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%', marginTop: 10 }}>
         <View style={{ paddingHorizontal: 50, marginTop: 10 }}>
           <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.created_at) || "#NA#"}</Text>
           <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.user?.name || "#NA#"}`}</Text></Text>
         </View>
-        <View>
-          <Icon name="thumbs-up" size={25} color={PRIMARY_COLOR} />
-          <Text style={{
-            fontSize: 10, color: PRIMARY_COLOR,
-            textAlign: 'center'
-          }}>{postDetails?.likes || "0"}</Text>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ marginRight: 10 }}>
+            <Icon name="thumbs-up" size={25} color={PRIMARY_COLOR} />
+            <Text style={{
+              fontSize: 10, color: PRIMARY_COLOR,
+              textAlign: 'center'
+            }}>{postDetails?.likes || "0"}</Text>
+          </View>
+          <View>
+            <Icon name="share" size={25} color={PRIMARY_COLOR} />
+            <Text style={{
+              fontSize: 10, color: PRIMARY_COLOR,
+              textAlign: 'center'
+            }}>{postDetails?.shares || "0"}</Text>
+          </View>
         </View>
       </View>
-      {postDetails?.status === 2 && <View style={{ paddingHorizontal: 30, marginVertical: 15 }}>
+      {postDetails?.status === 4 && <View style={{ paddingHorizontal: 30, marginVertical: 15 }}>
         <Menu w="340"
           placement='bottom'
           style={{ postion: 'relative', top: 20, }}
@@ -239,18 +263,18 @@ const PostDetails = ({ navigation, route }) => {
             if (el?.file.includes('.jpg' || '.png')) {
               return <Image source={{ uri: `${env.imageUri}${el.file}` }} style={{ width: '100%', height: 150, marginVertical: 10, borderRadius: 5 }} alt="" key={index} />
             } else if (el?.file.includes('.mp4')) {
-              return <View style={{width:'100%', marginVertical:10, borderRadius:5}}> 
-              <VideoPlayer
-              video={{ uri: `${env.videoUri}${el.file}` }}
-              videoWidth={1600}
-              videoHeight={900}
-              thumbnail={{ uri: 'https://i.picsum.photos/id/866/1600/900.jpg' }}
-              />
-          </View>
+              return <View style={{ width: '100%', marginVertical: 10, borderRadius: 5 }}>
+                <VideoPlayer
+                  video={{ uri: `${env.videoUri}${el.file}` }}
+                  videoWidth={1600}
+                  videoHeight={900}
+                  thumbnail={{ uri: 'https://i.picsum.photos/id/866/1600/900.jpg' }}
+                />
+              </View>
             }
             else if (el?.file?.includes('.mp3')) {
               return <View style={{ backgroundColor: '#e7d2cc', paddingVertical: 10, paddingHorizontal: 20, marginTop: 10, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: 5 }}>
-                <Text style={{ color: '#171710', width:'80%' }}>{el.file.split('/')[3]}</Text>
+                <Text style={{ color: '#171710', width: '80%' }}>{el.file.split('/')[3]}</Text>
                 <Video
                   key={index}
                   source={{ uri: `${env.videoUri}${el.file}` }}
@@ -408,7 +432,7 @@ const PostDetails = ({ navigation, route }) => {
           isAuthenticated && <>
             <View style={{ paddingHorizontal: 30 }}>
               <Checkbox my="2" value={postAuthenticate} onChange={() => setPostAuthenticate(!postAuthenticate)}
-              colorScheme={"success"}
+                colorScheme={"success"}
               >
                 Authenticate
               </Checkbox>
@@ -427,14 +451,14 @@ const PostDetails = ({ navigation, route }) => {
               {postAuthenticate === true && <>
                 <Box style={{ marginTop: 25, flexDirection: 'row', justifyContent: 'space-between' }}>
                   <View style={{ flexDirection: "row", justifyContent: 'space-between', alignItems: "center", width: '100%' }}>
-                    <Text>Survey Document</Text>
+                    <Text style={{ color: '#333333' }}>Survey Document</Text>
                     <Button
-                    leftIcon={<Icon name="upload" size={15} color="#e7625f"/>}
+                      leftIcon={<Icon name="upload" size={15} color="#e7625f" />}
                       size={'xs'}
                       color={'#e7625f'}
                       variant={'outline'}
                       _text={{
-                        color:"#e7625f"
+                        color: "#e7625f"
                       }}
                       borderColor={'#e7625f'}
                       onPress={() => handlePostFile()}
@@ -442,8 +466,8 @@ const PostDetails = ({ navigation, route }) => {
                   </View>
                 </Box>
                 {
-                  verifiedDocument && verifiedDocument.length > 0 ? verifiedDocument.map((el, index) => <Box shadow="5" key={index} style={{paddingHorizontal:10, paddingVertical:10, marginTop: 20, padding: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: "center", borderRadius:5, backgroundColor: "#ACB4A0"}}>
-                    <Text style={{ color: "#252827", width:'80%' }}>{el.name}</Text>
+                  verifiedDocument && verifiedDocument.length > 0 ? verifiedDocument.map((el, index) => <Box shadow="5" key={index} style={{ paddingHorizontal: 10, paddingVertical: 10, marginTop: 20, padding: 5, flexDirection: 'row', justifyContent: 'space-between', alignItems: "center", borderRadius: 5, backgroundColor: "#ACB4A0" }}>
+                    <Text style={{ color: "#252827", width: '80%' }}>{el.name}</Text>
                     <TouchableOpacity onPress={() => deleteFile(index, 'post')}><Icon name="trash" size={20} color="#EF3340" /></TouchableOpacity>
                   </Box>)
 
@@ -504,6 +528,7 @@ const PostDetails = ({ navigation, route }) => {
         </>}
       </>}
     </ScrollView>
+  </>
   )
 }
 
@@ -512,6 +537,9 @@ export default PostDetails
 
 const styles = StyleSheet.create({
   div: {
+    color: 'red'
+  },
+  p: {
     color: 'black'
   }
 })

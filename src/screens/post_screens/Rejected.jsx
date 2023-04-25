@@ -22,7 +22,7 @@ function Rejected() {
 
   const getUserPostData = async  () =>{
     setIsLoading(true)
-    const response = await getUserPost(2, offset)
+    const response = await getUserPost(4, offset)
     if (response && response?.data?.length > 0) {
         //After the response increasing the offset for the next API call.
         setPost([...response.data]);
@@ -32,7 +32,7 @@ function Rejected() {
 
   const loadMoreItem = async () => {
     setOffset(offset + 10);
-    const response = await getUserPost(2, offset)
+    const response = await getUserPost(4, offset)
     if (response && response?.data?.length > 0) {
         //After the response increasing the offset for the next API call.
         setPost([...post, ...response.data]);

@@ -47,19 +47,19 @@ function Profile({ navigation }) {
     }
 
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => <View style={{
-                flexDirection: 'row', alignItems: "center"
-            }}>
-                <TouchableOpacity onPress={handleUserNavigation}>
-                    <Image source={require('../../../assets/images/create.png')} alt="" />
-                </TouchableOpacity>
-            </View>
-        });
-    }, []);
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerRight: () => <View style={{
+    //             flexDirection: 'row', alignItems: "center"
+    //         }}>
+    //             <TouchableOpacity onPress={handleUserNavigation}>
+    //                 <Image source={require('../../../assets/images/create.png')} alt="" />
+    //             </TouchableOpacity>
+    //         </View>
+    //     });
+    // }, []);
 
-    
+
 
     const renderTabBar = props => (
         <View style={{
@@ -95,7 +95,27 @@ function Profile({ navigation }) {
         navigation.navigate('Login')
     }
 
-    return (
+    return (<>
+        <TouchableOpacity
+            onPress={() => handleUserNavigation()}
+            style={[{
+                width: 50,
+                height: 50,
+                borderColor: PRIMARY_COLOR,
+                borderRadius: 30,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#f5f5f5',
+                borderWidth: 2,
+                position: "absolute",
+                bottom: 20,
+                right: 20,
+                zIndex: 2
+            }, {
+                elevation: 5, shadowColor: 'black'
+            }]}>
+            <Icon name="plus" size={25} color={PRIMARY_COLOR} />
+        </TouchableOpacity>
         <View style={{
             flex: 1,
             backgroundColor: 'white'
@@ -118,9 +138,11 @@ function Profile({ navigation }) {
                             borderWidth: 1,
                             borderColor: PRIMARY_COLOR
                         }}>
-                            {profileData?.display_picture ? <Image source={{ uri: `${env.imageUri}${profileData?.display_picture}` }} alt="" 
-                            style={{width:'100%', height:'100%', borderRadius:20}}
-                            /> : <Image source={require('../../../assets/images/profile_img.png')} alt="" />}
+                            {profileData?.display_picture ? <Image source={{ uri: `${env.imageUri}${profileData?.display_picture}` }} alt=""
+                                style={{ width: '100%', height: '100%', borderRadius: 20 }}
+                            /> : <Image source={{ uri: "https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png" }} alt=""
+                                style={{ width: '100%', height: '100%', borderRadius: 20 }}
+                            />}
                         </View>
                         <View style={{
                             marginLeft: 15,
@@ -178,8 +200,8 @@ function Profile({ navigation }) {
                         </Menu.Item>
                     </Menu>
 
-               </View>
-             </View>
+                </View>
+            </View>
             <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
@@ -188,6 +210,7 @@ function Profile({ navigation }) {
                 initialLayout={{ width: Dimensions.get('window').width }}
             />
         </View>
+    </>
     );
 }
 

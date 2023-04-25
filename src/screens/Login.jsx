@@ -58,7 +58,7 @@ function Login({ navigation }) {
         let data = await response.json()
         if (data && data?.data?.otp_sent === true) {
             setIsLoading(false)
-            ToastAndroid.show('OTP sent...', ToastAndroid.LONG)
+            ToastAndroid.show('OTP sent...', ToastAndroid.SHORT)
             navigation.navigate('Verification', {
                 number: phoneNumber
             })
