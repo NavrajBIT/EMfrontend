@@ -35,11 +35,10 @@ function Login({ navigation }) {
         } else {
             setIsError(false)
         }
-
     }
 
     //submitting the phone number
-    const handleSubmit = async () => {
+    const handleSubmit = async () => {  
         if (phoneNumber.length < 10) {
             setIsError(true)
             return;
