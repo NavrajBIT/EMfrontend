@@ -17,6 +17,7 @@ import { env } from '../../../env';
 function Profile({ navigation }) {
 
     const [profileData, setProfileData] = useState([])
+    console.log(profileData)
     const getUserData = async () => {
         const response = await getProfileData();
         if (response.status === 200 && response?.data) {
@@ -45,20 +46,6 @@ function Profile({ navigation }) {
             navigation.navigate('CreatePost')
         }
     }
-
-
-    // useLayoutEffect(() => {
-    //     navigation.setOptions({
-    //         headerRight: () => <View style={{
-    //             flexDirection: 'row', alignItems: "center"
-    //         }}>
-    //             <TouchableOpacity onPress={handleUserNavigation}>
-    //                 <Image source={require('../../../assets/images/create.png')} alt="" />
-    //             </TouchableOpacity>
-    //         </View>
-    //     });
-    // }, []);
-
 
 
     const renderTabBar = props => (
@@ -146,7 +133,8 @@ function Profile({ navigation }) {
                         </View>
                         <View style={{
                             marginLeft: 15,
-                            paddingVertical: 5
+                            paddingVertical: 5,
+                            width:'70%'
                         }}>
                             <Text style={{
                                 fontSize: 20,

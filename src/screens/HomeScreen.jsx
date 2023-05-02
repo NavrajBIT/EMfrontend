@@ -74,9 +74,6 @@ function HomeScreen({navigation}) {
             flexDirection: 'row',
             alignItems: 'center',
           }}>
-          <TouchableOpacity onPress={handleUserNavigation}>
-            <Image source={require('../../assets/images/create.png')} alt="" />
-          </TouchableOpacity>
           <TouchableOpacity onPress={handleNavigation} style={{marginLeft: 10}}>
             <Image
               source={require('../../assets/images/profile.png')}

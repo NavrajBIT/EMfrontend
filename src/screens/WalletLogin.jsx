@@ -93,7 +93,7 @@ function WalletButton({navigation}) {
 
   return (
     <CustomButton
-      title={'Wallet-Login'}
+      title={'Login Anonymously'}
       onPress={() => login()}
       customStyle={{marginTop: 20, color: 'green'}}
     />

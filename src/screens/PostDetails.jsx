@@ -193,7 +193,7 @@ const PostDetails = ({ navigation, route }) => {
         </View>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%', marginTop: 10 }}>
-        <View style={{ paddingHorizontal: 50, marginTop: 10 }}>
+        <View style={{ paddingHorizontal: 50, marginTop: 10, width:'70%' }}>
           <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.created_at) || "#NA#"}</Text>
           <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.user?.name || "#NA#"}`}</Text></Text>
         </View>
