@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import { env } from '../../../env'
 import { handleDate } from '../../utils'
+import HTMLView from "react-native-htmlview";
+
 
 
 const RectNewsCard = ({data}) => {
@@ -14,7 +16,7 @@ const RectNewsCard = ({data}) => {
     async function handleNavigation() {
         let token = await AsyncStorage.getItem('token')
         if (token) {
-            navigation.navigate('PostDetails', {
+            navigation.navigate('TopNewsPostDetails', {
                 data: data
             })
         } else {
@@ -22,14 +24,15 @@ const RectNewsCard = ({data}) => {
         }
     }
 
+
     return (
-        <TouchableOpacity onPress={() => handleNavigation()} style={{marginVertical: 15}}>
+        <TouchableOpacity onPress={() => handleNavigation()} style={{marginVertical: 15,  height: 192}}>
             <Box rounded="lg" overflow="hidden" style={{
                 width: '100%',
                 height: 192,
             }}>
                 <AspectRatio>
-                  { data?.display_picture ? <Image source={{uri: `${env.imageUri}${data?.display_picture}`}} alt="image" 
+                  { data && data?.image ? <Image source={{uri:`${data?.image.split(".jpg")[0]}.jpg`}} alt="image" 
                     width={"100%"}
                     height={"100%"}
                     /> : 
@@ -51,15 +54,10 @@ const RectNewsCard = ({data}) => {
                         fontSize: 12,
                         fontWeight: '500',
                         textAlignVertical: 'center'
-                    }}><Icon name="dot-single" size={15} color={'#ffffff'} />{handleDate(data?.created_at)}</Text>
-                    <Text style={{
-                        zIndex: 10,
-                        color: 'white',
-                        fontSize: 14,
-                        fontWeight: '500',
-                    }}>
-                        {data?.title}
-                    </Text>
+                    }}><Icon name="dot-single" size={15} color={'#ffffff'} />{handleDate(data?.date)}</Text>
+                    {data?.title &&
+                        <View><HTMLView value={`<p>${data?.title}</p>`} stylesheet={styles}/></View>
+                    }
                 </Box>
             </Box>
         </TouchableOpacity>
@@ -67,3 +65,12 @@ const RectNewsCard = ({data}) => {
 }
 
 export default RectNewsCard
+
+
+
+const styles = StyleSheet.create({
+ 
+    p: {
+      color: 'white',
+    fontWeight:"600"    }
+  })

@@ -29,6 +29,7 @@ function CreatePost() {
     const [proofDocument, setProofDocument] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [location, setLocation] = useState([])
+    const scrollRef = useRef();
 
     useEffect(() => {
         getCategory();
@@ -128,7 +129,6 @@ function CreatePost() {
                 alert(response.customButton);
             } else {
                 setImageError(false)
-                console.log('response', JSON.stringify(response));
                 setImageFile(response)
             }
         });
@@ -145,6 +145,15 @@ function CreatePost() {
             setProofDocument(tempData)
         }
     }
+
+    const scrollToTop = () => {
+        scrollRef.current?.scrollTo({
+            y: 0,
+            animated: true,
+        });
+    }
+
+
 
 
     function handleImageUri(imageFile) {
@@ -171,6 +180,11 @@ function CreatePost() {
             validationSchema={validationSchema}
             onSubmit={async (values) => {
 
+                if (!imageFile) {
+                    scrollToTop()
+                    setImageError(true);
+                    return;
+                }
                 setIsLoading(true)
                 const formData = new FormData()
 
@@ -194,14 +208,14 @@ function CreatePost() {
                     navigation.navigate('Home')
                 }
                 else {
-                    console.log(response)
                     ToastAndroid.show(response?.message, ToastAndroid.LONG)
                 }
+
 
             }}
         >
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                <ScrollView >
+                <ScrollView ref={scrollRef}>
                     <View style={styles.container}>
                         <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
 
@@ -216,7 +230,9 @@ function CreatePost() {
                                 marginTop: 25,
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                            }} /> :
+                            }}
+
+                            /> :
                                 <View
                                     style={{
                                         height: 150,
@@ -311,6 +327,7 @@ function CreatePost() {
                                     <RichToolbar
                                         style={{ marginTop: 5, color: 'black' }}
                                         editor={richText}
+
                                         actions={[actions.setBold, actions.setItalic, actions.setUnderline, actions.heading1, actions.insertBulletsList, actions.insertOrderedList, actions.checkboxList,
                                         actions.insertLink, actions.setStrikthrough]}
                                         iconMap={{ [actions.heading1]: handleHead }}
@@ -318,13 +335,13 @@ function CreatePost() {
                                 </FormControl>
                             </Box>
                             <Box style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                              <View>
+                                <View>
                                     <FormControl.Label>Category</FormControl.Label>
                                     <Select placeholder="Select Category" minWidth={"150"}
                                         onValueChange={handleChange('category')}
                                         onBlur={handleBlur('category')}
                                         selectedValue={values.category}
-                                            >
+                                    >
                                         {category.length > 0 && category.map((el, index) => {
                                             if (el.name === 'All') {
                                                 return;
@@ -334,13 +351,13 @@ function CreatePost() {
 
                                     </Select>
                                     {errors.category && touched.location && <Text style={{
-                                        fontSize:12, color:'red'
+                                        fontSize: 12, color: 'red'
                                     }}>Please select a category</Text>}
-                             </View>
-                               <View>
+                                </View>
+                                <View>
                                     <FormControl.Label>Location</FormControl.Label>
                                     <Select accessibilityLabel="Select Location" placeholder="Choose Service"
-                                    minWidth="150"
+                                        minWidth="150"
                                         onValueChange={handleChange('location')}
                                         _selectedItem={{
                                             bg: "teal.600",
@@ -352,9 +369,9 @@ function CreatePost() {
                                         })}
                                     </Select>
                                     {errors.location && touched.location && <Text style={{
-                                        fontSize:12, color:'red'
+                                        fontSize: 12, color: 'red'
                                     }}>Please select a location</Text>}
-                               </View>
+                                </View>
                             </Box>
                             <Box style={{ marginTop: 25, flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ flexDirection: "row", justifyContent: 'space-between', alignItems: "center", width: '100%' }}>

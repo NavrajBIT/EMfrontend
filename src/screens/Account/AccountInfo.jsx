@@ -18,7 +18,6 @@ const AccountInfo = ({ navigation }) => {
             </TouchableHighlight>
 
             <TouchableHighlight
-                onPress={() => console.log('yo')}
                 style={styles.buttonContainer}>
                 <Text style={{ fontSize: 18, color: '#333333' }}>About Us</Text>
             </TouchableHighlight>

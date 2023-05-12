@@ -25,7 +25,6 @@ function Posted() {
     const response = await getUserPost(3, offset)
     if (response && response?.data?.length > 0) {
         //After the response increasing the offset for the next API call.
-        console.log(response)
         setPost([...response.data]);
         setIsLoading(false);
     }

@@ -1,4 +1,4 @@
-import { Animated, Text, StyleSheet, FlatList, Dimensions,View, ActivityIndicator, SafeAreaView, Easing, TouchableOpacity } from 'react-native'
+import { Animated, Text, StyleSheet, FlatList, Dimensions, View, ActivityIndicator, SafeAreaView, Easing, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { Select, Box, CheckIcon, ScrollView, useSafeArea } from 'native-base'
 import Icon from 'react-native-vector-icons/Entypo'
@@ -7,25 +7,30 @@ import SquareNewsCard from '../../components/Cards/SquareNewsCard'
 import RectNewsCard from '../../components/Cards/RectNewsCard'
 import { useNavigation } from '@react-navigation/native'
 import Carousel from 'react-native-snap-carousel'
-import { getAllLocation, getAllPost } from '../../services/api'
+import { getAllLocation, getAllPost, getRecentNews } from '../../services/api'
 import ChevronButton from '../../components/AnimatedChevron'
 import CreatPostIcons from '../../components/Cards/CreatePostIcons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
+const { height: screenHeight } = Dimensions.get('window');
+
 const ForYou = ({ item }) => {
 
     const navigation = useNavigation()
-    const [post, setPost] = useState([]);
+    const [post, setPost] = useState([{ item: true, id: 0 }]);
     const [offset, setOffset] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [topNews, setTopNews] = useState([])
     const [location, setLocation] = useState([])
     const [showFloatIcon, setShowFloatIcon] = useState(false)
     const [initialLocation, setInitialLocation] = useState("all")
+    const [recentPostLoading, setRecentPostLoading] = useState(false)
     const [showIcon, setShowIcon] = useState({
         right: true,
         left: false,
     })
+    const [page, setPage] = useState(1);
+    const [isEndReached, setIsEndReached] = useState(false);
 
     const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -36,6 +41,33 @@ const ForYou = ({ item }) => {
         }
     }
 
+    useEffect(() => {
+        getTopNews()
+    }, [page]);
+
+    const getTopNews = async () => {
+        setRecentPostLoading(true);
+        const response = await getRecentNews(10, page);
+        if (response && response.length > 0) {
+            setRecentPostLoading(false);
+            let finalData = response.map(el => {
+                let obj = {
+                    id: el.id,
+                    title: el?.title?.rendered,
+                    content: el?.content?.rendered,
+                    date: el?.date,
+                    image: el?.yoast_head_json?.og_image[0]?.url,
+                    author: el?.yoast_head_json?.author,
+                    description: el?.yoast_head_json?.description
+                }
+                return obj
+            })
+            setPost([...post, ...finalData])
+            if (response.length === 0) {
+                setIsEndReached(true);
+            }
+        }
+    }
     useEffect(() => {
         Animated.loop(
             Animated.timing(animatedValue, {
@@ -52,34 +84,37 @@ const ForYou = ({ item }) => {
         outputRange: [0, 10, 0]
     })
 
+
+
+
+    const handleEndReached = () => {
+        if (!recentPostLoading && !isEndReached) {
+            setPage(page + 1);
+        }
+    };
+
+
+
     useEffect(() => {
         getRegions()
     }, [])
 
     useEffect(() => {
         getUserPostData()
-        console.log('yo')
     }, [item]);
 
-    useEffect(() =>{
+    useEffect(() => {
         getUserPostData()
     }, [initialLocation])
 
     const getUserPostData = async () => {
         setIsLoading(true);
         const response = await getAllPost(item.name, 0, initialLocation)
-        console.log(response, "sadfasd")
         setIsLoading(false);
         if (response && response?.data?.length > 0) {
-            console.log(response, 'iser data')
-            //After the response increasing the offset for the next API call.
-            let topPost = response.data.length > 0 && response.data?.slice(0, 4);
-            setTopNews(topPost)
-            console.log(response?.data.slice(4).length)
-            let finalPosts = response?.data.slice(4)
-            setPost(finalPosts)
-        }else{
-           setTopNews([])
+            setTopNews(response?.data)
+        } else {
+            setTopNews([])
         }
     }
 
@@ -89,17 +124,32 @@ const ForYou = ({ item }) => {
         const response = await getAllPost(item.name, offset, initialLocation)
         if (response && response?.data?.length > 0) {
             //After the response increasing the offset for the next API call.
-            setPost([...post, ...response.data]);
+            if (topNews.length > 10) {
+                setTopNews([...topNews, ...response.data]);
+            } else {
+                return;
+            }
         }
     };
 
-    const renderItem = ({ item }) => {
-        return (<>
+    const renderItem = ({ item, index }) => {
+
+        const MemoizedItemComponent = React.memo(() => (
             <RectNewsCard data={item} />
-        </>
-        );
+        ));
+
+        return index === 0 ? <HorizontalList /> : <MemoizedItemComponent />
     };
-    const renderLoader = () => <ActivityIndicator color={PRIMARY_COLOR} size="small" />
+
+    const renderSquareItem = ({ item }) => {
+        return (
+            <>
+                <SquareNewsCard data={item} />
+            </>
+        )
+    }
+    const renderLoader = () => <View style={{ height: '100%', justifyContent: 'center' }}><ActivityIndicator color={PRIMARY_COLOR} size="small" /></View>
+    const RecentLoader = () => <View style={{ marginTop: 20, marginBottom: 20, width: "100%" }}><ActivityIndicator color={PRIMARY_COLOR} size="small" /></View>
 
 
     if (isLoading) {
@@ -114,10 +164,10 @@ const ForYou = ({ item }) => {
 
     const handleScroll = (event) => {
         const scrollPosition = event.nativeEvent.contentOffset.x;
+        console.log(scrollPosition)
         if (scrollPosition > 0) {
             setShowIcon({ left: true, right: false })
         } else if (scrollPosition <= 0) {
-            console.log(scrollPosition)
             setShowIcon({ left: false, right: true })
 
         }
@@ -128,7 +178,6 @@ const ForYou = ({ item }) => {
         if (scrollPosition > 0) {
             setShowFloatIcon(true)
         } else if (scrollPosition === 0) {
-            console.log(scrollPosition, "position")
             setShowFloatIcon(false)
 
         }
@@ -142,6 +191,59 @@ const ForYou = ({ item }) => {
             navigation.navigate('CreatePost')
         }
     }
+
+    const renderFooter = () => {
+        if (!recentPostLoading) {
+            return null;
+        }
+
+        return <RecentLoader />;
+    };
+
+
+    const HorizontalList = () => <View style={{
+        height: 200
+    }}>
+        {showIcon.right &&
+            <Animated.View style={[{
+                position: 'absolute',
+                top: 55,
+                right: -5,
+                zIndex: 3
+            }, { transform: [{ translateY: interpolateValue }] }]}>
+                <Icon name="chevron-right" size={50} color="white"
+
+                />
+            </Animated.View>}
+        {showIcon.left &&
+            <Animated.View style={[{
+                position: 'absolute',
+                top: 55,
+                left: -5,
+                zIndex: 3
+            }, { transform: [{ translateY: interpolateValue }] }]}>
+                <Icon name="chevron-left" size={50} color="white"
+
+                />
+            </Animated.View>
+        }
+        <ScrollView horizontal style={{ marginBottom: 0, height: 200, width: '100%' }}
+
+        >
+            <CreatPostIcons />
+            <FlatList
+                data={topNews}
+                contentContainerStyle={{ minWidth: '100%' }}
+                renderItem={renderSquareItem}
+                keyExtractor={(item, index) => item.id.toString()}
+                onEndReached={loadMoreItem}
+                onEndReachedThreshold={0}
+                horizontal
+                onScroll={event  => handleScroll(event)}
+                ListFooterComponent={renderLoader}
+            />
+        </ScrollView>
+    </View>
 
 
     return (<>
@@ -166,60 +268,36 @@ const ForYou = ({ item }) => {
                 }]}>
                 <Icon name="plus" size={25} color={PRIMARY_COLOR} />
             </TouchableOpacity>}
-            <ScrollView style={styles.container} onScroll={handleVerticallScroll}>
+            <SafeAreaView style={styles.container}  >
                 <Box maxW="120" style={{ paddingVertical: 10 }}>
                     <Select selectedValue={initialLocation} minWidth="100" height={"10"} accessibilityLabel="Choose Service" placeholder="Your region"
                         size={'xs'}
                         _selectedItem={{
                             bg: "gray.400",
-                            borderRadius:10,
+                            borderRadius: 10,
                             endIcon: <Icon name="chevron-small-down" size={10} />
-                        }} mt={1} onValueChange={itemValue => {setInitialLocation(itemValue)}}>
+                        }} mt={1} onValueChange={itemValue => { setInitialLocation(itemValue) }}>
                         <Select.Item label="Your Region" value={"all"} />
                         {
                             location.map(el => <Select.Item label={el} value={el} />)
                         }
                     </Select>
                 </Box>
-                {showIcon.right &&
-                    <Animated.View style={[{
-                        position: 'absolute',
-                        top: 120,
-                        right: -5,
-                        zIndex: 3
-                    }, { transform: [{ translateY: interpolateValue }] }]}>
-                        <Icon name="chevron-right" size={50} color="white"
+                <View style={{
+                    height: screenHeight - 200
+                }}>
+                    <FlatList
+                        data={post}
+                        onScroll={(event) => { handleVerticallScroll(event) }}
+                        renderItem={renderItem}
+                        keyExtractor={(item, index) => index.toString()}
+                        onEndReached={handleEndReached}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={renderFooter}
+                    />
+                </View>
 
-                        />
-                    </Animated.View>}
-                {showIcon.left &&
-                    <Animated.View style={[{
-                        position: 'absolute',
-                        top: 120,
-                        left: -5,
-                        zIndex: 3
-                    }, { transform: [{ translateY: interpolateValue }] }]}>
-                        <Icon name="chevron-left" size={50} color="white"
-
-                        />
-                    </Animated.View>
-                }
-                <ScrollView horizontal style={{ marginBottom: 15 }} onScroll={handleScroll}
-
-                >
-                    <CreatPostIcons />
-                    {topNews.length > 0 && topNews.map(el => <SquareNewsCard data={el} />)}
-                </ScrollView>
-
-                <FlatList
-                    data={post}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => String(index)}
-                    onEndReached={loadMoreItem}
-                    onEndReachedThreshold={0}
-                    ListFooterComponent={renderLoader}
-                />
-            </ScrollView >
+            </SafeAreaView>
         </>
             :
             <View style={styles.container}>
@@ -239,7 +317,7 @@ const ForYou = ({ item }) => {
                 </Box>
                 <CreatPostIcons />
             </View>
-            }
+        }
 
     </>
     )

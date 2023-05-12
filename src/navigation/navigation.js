@@ -15,6 +15,7 @@ import AccountInfo from '../screens/Account/AccountInfo';
 import CreatePost from '../screens/CreatePost';
 import Category from '../screens/Category';
 import Comment from '../screens/Comment';
+import TopNewsPostDetails from '../screens/TopNewsPostDetails';
 
 const Stack = createNativeStackNavigator()
 
@@ -70,6 +71,9 @@ const Navigation = () => {
                 })}
             />
             <Stack.Screen name="PostDetails" component={PostDetails}
+                    options={{headerShown:false}}
+            />
+              <Stack.Screen name="TopNewsPostDetails" component={TopNewsPostDetails}
                     options={{headerShown:false}}
             />
               <Stack.Screen name="CreatePost" component={CreatePost}

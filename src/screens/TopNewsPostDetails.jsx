@@ -1,3 +1,4 @@
+var decode =  require('decode-html')
 import { Text, ScrollView, View, Pressable, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/Entypo'
@@ -16,7 +17,7 @@ import VideoPlayer from 'react-native-video-player'
 import DocumentPicker from 'react-native-document-picker'
 
 
-const PostDetails = ({ navigation, route }) => {
+const TopNewsPostDetails = ({ navigation, route }) => {
 
   const [postDetails, setPostDetails] = useState(null)
   const [loading, setIsLoading] = useState(false)
@@ -39,7 +40,7 @@ const PostDetails = ({ navigation, route }) => {
   useEffect(() => {
     getPostDetails()
   }, [isCommented])
-
+  let data = route.params.data;
 
 
   const getPostDetails = async () => {
@@ -101,6 +102,10 @@ const PostDetails = ({ navigation, route }) => {
     }
 
   }
+  function removeRepeatedNewlines(htmlString) {
+    return htmlString.replace(/\n{2,}/g, "\n");
+  }
+
 
 
   const handlePostFile = async () => {
@@ -142,7 +147,14 @@ const PostDetails = ({ navigation, route }) => {
       navigation.navigate('CreatePost')
     }
   }
-  
+
+  function removeSpecificCharacters(htmlString) {
+    let newHtmlString = htmlString.replace(/\n+/g, "");
+    newHtmlString = newHtmlString.replace(/&quot;/g, "");
+    newHtmlString = newHtmlString.replace(/\t+/g, "");
+    return newHtmlString;
+  }
+
 
   if (loading) {
     return <SafeAreaView>
@@ -181,21 +193,14 @@ const PostDetails = ({ navigation, route }) => {
             <Icon name="chevron-left" size={30} color={PRIMARY_COLOR} />
           </TouchableOpacity>
           <Box >
-            <Text style={{
-              fontSize: 20,
-              marginLeft: 10,
-              fontWeight: '500',
-              letterSpacing: 0.5,
-              paddingRight: 12,
-              color: 'black'
-            }}>{postDetails?.title || "#NA#"}</Text>
+            <HTMLView value={`<p>${data?.title}</p>`} stylesheet={titlestyles} />
           </Box>
         </View>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%', marginTop: 10 }}>
-        <View style={{ paddingHorizontal: 50, marginTop: 10, width:'70%' }}>
-          <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.created_at) || "#NA#"}</Text>
-          <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.user?.name || "#NA#"}`}</Text></Text>
+        <View style={{ paddingHorizontal: 50, marginTop: 10, width: '70%' }}>
+          <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(data?.date) || "#NA#"}</Text>
+          <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{data?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${data?.author || "#NA#"}`}</Text></Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
           <View style={{ marginRight: 10 }}>
@@ -241,8 +246,8 @@ const PostDetails = ({ navigation, route }) => {
           </Menu.Item>
         </Menu>
       </View>}
-      {postDetails?.display_picture && <Image
-        source={{ uri: `${env.imageUri}${postDetails?.display_picture}` }}
+      {data && data?.image && <Image
+        source={{ uri: `${data?.image.split('.jpg')[0]}.jpg` }}
         style={{ width: "100%", height: 200, marginTop: 10 }}
         alt=""
       />}
@@ -254,9 +259,9 @@ const PostDetails = ({ navigation, route }) => {
         <Text style={{
           marginLeft: 10, fontWeight: '500',
           color: 'black'
-        }}>{postDetails?.description}</Text>
+        }}>{data?.description}</Text>
       </View>
-      {postDetails?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={postDetails?.content} stylesheet={styles} /></View>}
+      {data  && data?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={removeSpecificCharacters(decode(data?.content))} stylesheet={styles} /></View>}
       <View style={{ paddingHorizontal: 20 }}>
         {
           postFiles.length > 0 && postFiles.map((el, index) => {
@@ -299,7 +304,7 @@ const PostDetails = ({ navigation, route }) => {
           color: 'black',
           marginLeft: 15,
           fontSize: 16
-        }}>{postDetails?.user?.name || "#NA#"}</Text>
+        }}>{data?.author || "#NA#"}</Text>
 
       </View>
       {(postDetails?.status === 1 || postDetails?.status === 3) &&
@@ -333,6 +338,7 @@ const PostDetails = ({ navigation, route }) => {
         <Box alignItems="center" mt={3}>
           <FormControl>
             <Input placeholder={"Comment"}
+            isReadOnly={true}
               style={{ height: 46, fontSize: 12, color: 'rgba(0,0,0,0.5)' }}
               onChangeText={e => { setIsCommented(false); setComment(e) }}
               onSubmitEditing={() => commentPost()}
@@ -356,7 +362,7 @@ const PostDetails = ({ navigation, route }) => {
             textAlign: 'center',
             color: PRIMARY_COLOR,
             borderColor: PRIMARY_COLOR,
-          }}>{postDetails?.comments?.length}</Text>
+          }}>{postDetails?.comments?.length || "0"}</Text>
         </View>
         {commentList?.length > 0 && commentList?.map((el, index) => {
           if (index <= 2) {
@@ -533,7 +539,7 @@ const PostDetails = ({ navigation, route }) => {
 }
 
 
-export default PostDetails
+export default TopNewsPostDetails
 
 const styles = StyleSheet.create({
   div: {
@@ -542,4 +548,16 @@ const styles = StyleSheet.create({
   p: {
     color: 'black'
   }
+})
+
+const titlestyles = StyleSheet.create({
+  p: {
+    color: 'black',
+    fontSize: 20,
+    marginLeft: 10,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+    paddingRight: 12,
+  },
+
 })

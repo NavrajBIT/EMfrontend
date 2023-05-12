@@ -95,7 +95,6 @@ function PersonalDetails({ navigation, route }) {
         alert(response.customButton);
       } else {
         setImageError(false)
-        console.log('response', JSON.stringify(response));
         setImageFile(response)
       }
     });
@@ -141,7 +140,6 @@ function PersonalDetails({ navigation, route }) {
         }
         const response = await registerUser(formData)
         setIsLoading(false)
-        console.log(response)
         if (response && response?.status === 200) {
           ToastAndroid.show(response?.message, ToastAndroid.LONG)
           navigation.navigate('Home')

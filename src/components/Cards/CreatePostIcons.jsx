@@ -12,7 +12,7 @@ const CreatPostIcons = ({ data }) => {
     async function handleNavigation() {
         let token = await AsyncStorage.getItem('token')
         if (token) {
-            console.log('yoo')
+
             navigation.navigate('CreatePost')
         } else {
             ToastAndroid.show('Please login first...', ToastAndroid.SHORT)

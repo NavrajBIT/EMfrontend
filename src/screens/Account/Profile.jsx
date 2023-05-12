@@ -17,7 +17,6 @@ import { env } from '../../../env';
 function Profile({ navigation }) {
 
     const [profileData, setProfileData] = useState([])
-    console.log(profileData)
     const getUserData = async () => {
         const response = await getProfileData();
         if (response.status === 200 && response?.data) {

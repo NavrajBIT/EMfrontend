@@ -44,7 +44,6 @@ export const verifyEmailOtp = async formData => {
 
 
 export const registerUser = async (formData)=> {
-  console.log(formData)
   let token = await AsyncStorage.getItem('token')
   const response = await fetch(`${env.url}/auth/user`, {
     method: 'PATCH',
@@ -91,12 +90,11 @@ export const getProfileData = async () =>{
 
 
 export const createPost = async (formData)=> {
-  let token = await AsyncStorage.getItem('token')
   const response = await fetch(`${env.url}/post/post`, {
     method: 'POST',
     headers: {
       'Content-Type': 'multipart/form-data',
-      'Authorization': `Token ${token}`
+      'Authorization': `Token ${await AsyncStorage.getItem('token')}`
     },
     body: formData,
   });
@@ -128,7 +126,6 @@ export const getAllPost = async (category, offset, location) =>{
     url =  `${url}&location=${location}`
   }
 
-  console.log(url)
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -211,7 +208,6 @@ export const commentApi = async (id, content) =>{
 
 
 export const getAllCategories = async () =>{
-  console.log(await AsyncStorage.getItem('token'))
   try {
     const response = await fetch(`${env.url}/post/category`, {
       method: 'GET',
@@ -228,22 +224,33 @@ export const getAllCategories = async () =>{
 
 
 export const getAllLocation = async (type, state) =>{
-  console.log(type)
   let url = (state === "") ? `${env.url}/auth/location?list=${type}` : `${env.url}/auth/location?list=${type}&state=${state}`;
-  console.log(url)
   try {
     const response = await fetch(url, {
       method: 'GET',
     });
     let data = await response.json();
-    console.log(data)
+    return data;
+  } catch (error) {
+    return error;
+  }  
+  
+}
+
+
+export const getRecentNews = async (perPage, page) =>{
+  
+  let url = `https://www.eastmojo.com/wp-json/wp/v2/posts?status=publish&per_page=${perPage}&page=${page}`
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+    });
+    let data = await response.json();
     return data;
   } catch (error) {
     return error;
   }  
 }
-
-
 
 
 
