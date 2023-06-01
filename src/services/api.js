@@ -103,7 +103,9 @@ export const createPost = async (formData)=> {
 };
 
 
+
 export const getUserPost = async (type, offset) =>{
+  console.log(type, "post status")
   try {
     const response = await fetch(`${env.url}/post/post?status=${type}&limit=10&offset=${offset}`, {
       method: 'GET',
@@ -238,9 +240,10 @@ export const getAllLocation = async (type, state) =>{
 }
 
 
-export const getRecentNews = async (perPage, page) =>{
+export const getRecentNews = async ( id,perPage, page) =>{
+  console.log(id, 'id')
   
-  let url = `https://www.eastmojo.com/wp-json/wp/v2/posts?status=publish&per_page=${perPage}&page=${page}`
+  let url =  (id === 0) ? `https://www.eastmojo.com/wp-json/wp/v2/posts?status=publish&per_page=${perPage}&page=${page}`:  `https://www.eastmojo.com/wp-json/wp/v2/posts?status=publish&categories=${id}&per_page=${perPage}&page=${page}`
   try {
     const response = await fetch(url, {
       method: 'GET',

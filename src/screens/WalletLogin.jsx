@@ -100,14 +100,20 @@ function WalletButton({navigation}) {
         from: 'East Mojo',
       }),
     );
+    Linking.openURL('east_app://eastmojo_wallet')
   };
 
-  const downloadWallet = () => {
+  const downloadWallet = async  () => {
+    try{
+      await Linking.openURL('east_app://eastmojo_wallet')
+    }
+    catch(e){
     const url =
       Platform.OS === 'ios'
         ? 'https://itunes.apple.com/app/be-imagine-technology-wallet/id6443855034'
         : 'https://play.google.com/store/apps/details?id=beimagine.tech&pli=1';
     Linking.openURL(url);
+    }
   };
 
   if (!isWalletAvailable)
@@ -128,7 +134,7 @@ function WalletButton({navigation}) {
 
         <CustomButton
           title={'Download BitWallet'}
-          onPress={() => downloadWallet()}
+          onPress={() => downloadWallet() }
           customStyle={{marginTop: 20, color: 'green'}}
         />
       </>

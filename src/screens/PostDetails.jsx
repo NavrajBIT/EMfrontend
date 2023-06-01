@@ -74,6 +74,7 @@ const PostDetails = ({ navigation, route }) => {
     formData.append('status', status)
     formData.append("status_message", status_message)
     const response = await verifyPost(route?.params?.data?.id, formData)
+    console.log(response)
     setStatusLoading(false)
     if (response.status === 200) {
       ToastAndroid.show(response?.message, ToastAndroid.LONG)

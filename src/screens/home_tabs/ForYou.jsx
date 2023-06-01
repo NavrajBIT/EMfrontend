@@ -16,6 +16,7 @@ const { height: screenHeight } = Dimensions.get('window');
 
 const ForYou = ({ item }) => {
 
+    console.log(item)
     const navigation = useNavigation()
     const [post, setPost] = useState([{ item: true, id: 0 }]);
     const [offset, setOffset] = useState(0);
@@ -43,11 +44,11 @@ const ForYou = ({ item }) => {
 
     useEffect(() => {
         getTopNews()
-    }, [page]);
+    }, [page, item.wordpress_id]);
 
     const getTopNews = async () => {
         setRecentPostLoading(true);
-        const response = await getRecentNews(10, page);
+        const response = await getRecentNews(item.wordpress_id || 0,10, page);
         if (response && response.length > 0) {
             setRecentPostLoading(false);
             let finalData = response.map(el => {
@@ -231,7 +232,7 @@ const ForYou = ({ item }) => {
 
         >
             <CreatPostIcons />
-            <FlatList
+       {topNews.length > 0 &&    <FlatList
                 data={topNews}
                 contentContainerStyle={{ minWidth: '100%' }}
                 renderItem={renderSquareItem}
@@ -241,13 +242,13 @@ const ForYou = ({ item }) => {
                 horizontal
                 onScroll={event  => handleScroll(event)}
                 ListFooterComponent={renderLoader}
-            />
+            />}
         </ScrollView>
     </View>
 
 
     return (<>
-        {topNews.length > 0 ? <>
+        {topNews.length > 0 || post.length > 0 ? <>
             {showFloatIcon && <TouchableOpacity
                 onPress={() => handleUserNavigation()}
                 style={[{

@@ -1,4 +1,4 @@
-var decode =  require('decode-html')
+var decode = require('decode-html')
 import { Text, ScrollView, View, Pressable, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/Entypo'
@@ -10,10 +10,12 @@ import { handleDate } from '../utils'
 import { env } from '../../env'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { reactPost } from '../services/api'
-import HTMLView from "react-native-htmlview";
+
 import Video from 'react-native-video'
 import { StyleSheet } from 'react-native'
 import VideoPlayer from 'react-native-video-player'
+import HTMLView from 'react-native-htmlview'
+import RenderHtml from 'react-native-render-html';
 import DocumentPicker from 'react-native-document-picker'
 
 
@@ -102,9 +104,6 @@ const TopNewsPostDetails = ({ navigation, route }) => {
     }
 
   }
-  function removeRepeatedNewlines(htmlString) {
-    return htmlString.replace(/\n{2,}/g, "\n");
-  }
 
 
 
@@ -152,8 +151,28 @@ const TopNewsPostDetails = ({ navigation, route }) => {
     let newHtmlString = htmlString.replace(/\n+/g, "");
     newHtmlString = newHtmlString.replace(/&quot;/g, "");
     newHtmlString = newHtmlString.replace(/\t+/g, "");
+    newHtmlString = newHtmlString.replace("class", "rel")
+
     return newHtmlString;
   }
+
+
+  console.log(data?.content)
+
+  const renderersProps = {
+    a: {
+      onPress: () => { }, // Empty onPress handler to disable the link functionality
+      selectable: false, // Disable text selection on anchor tags
+      style: { textDecorationLine: 'none' }, // Remove text underline style
+    },
+  };
+
+  const tagsStyles = {
+  body: {
+    color: 'black'
+  },
+  
+};
 
 
   if (loading) {
@@ -261,7 +280,10 @@ const TopNewsPostDetails = ({ navigation, route }) => {
           color: 'black'
         }}>{data?.description}</Text>
       </View>
-      {data  && data?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={removeSpecificCharacters(decode(data?.content))} stylesheet={styles} /></View>}
+      {data && data?.content && <ScrollView style={{ paddingHorizontal: 30, marginTop: 30 }}><RenderHtml source={{ html: removeSpecificCharacters(decode(data?.content)) }}
+      tagsStyles={tagsStyles}
+        renderersProps={renderersProps}
+      /></ScrollView>}
       <View style={{ paddingHorizontal: 20 }}>
         {
           postFiles.length > 0 && postFiles.map((el, index) => {
@@ -338,7 +360,7 @@ const TopNewsPostDetails = ({ navigation, route }) => {
         <Box alignItems="center" mt={3}>
           <FormControl>
             <Input placeholder={"Comment"}
-            isReadOnly={true}
+              isReadOnly={true}
               style={{ height: 46, fontSize: 12, color: 'rgba(0,0,0,0.5)' }}
               onChangeText={e => { setIsCommented(false); setComment(e) }}
               onSubmitEditing={() => commentPost()}
@@ -547,7 +569,12 @@ const styles = StyleSheet.create({
   },
   p: {
     color: 'black'
-  }
+  },
+  entryWrapper: {
+
+    width: 350,
+  },
+
 })
 
 const titlestyles = StyleSheet.create({
@@ -555,9 +582,12 @@ const titlestyles = StyleSheet.create({
     color: 'black',
     fontSize: 20,
     marginLeft: 10,
+
     fontWeight: '500',
     letterSpacing: 0.5,
     paddingRight: 12,
   },
-
+  entryWrapper: {
+    backgroundColor: 'blue',
+  }
 })

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
 
   StyleSheet,
-  Text,
+  Text,ActivityIndicator,
   useColorScheme,
   Linking, SafeAreaView, View, Image
 } from 'react-native';
@@ -19,6 +19,12 @@ import NetInfo from '@react-native-community/netinfo';
 // import linking from './src/utils/linking';
 
 function App() {
+
+
+  const linking = {
+    prefixes: ['peoplesapp://']
+  };
+
 
   const [isOnline, setIsOnline] = useState(true);
   React.useEffect(() => {
@@ -72,7 +78,8 @@ function App() {
         <NativeBaseProvider>
           <CategoryContextProvider>
             <AuthContextProvider>
-              <NavigationContainer>
+              <NavigationContainer linking={linking}
+                fallback={<ActivityIndicator color="blue" size="large" />}>
                 <Navigation />
               </NavigationContainer>
             </AuthContextProvider>

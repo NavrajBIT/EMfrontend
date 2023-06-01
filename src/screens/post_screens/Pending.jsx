@@ -9,20 +9,30 @@ import { ActivityIndicator } from 'react-native-paper';
 import UserPost from '../../components/Post/UserPost'
 import { getUserPost } from '../../services/api';
 import { PRIMARY_COLOR } from '../../styles/style';
+import  AsyncStorage from '@react-native-async-storage/async-storage'
 
 function Pending() {
 
   const [post, setPost] = useState([]);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [userType, setUserType] = useState("")
+
   
   useEffect(() => {
+    getUserType()
      getUserPostData()
   }, []);
 
+  const getUserType =async  () =>{
+    console.log(typeof await AsyncStorage.getItem('user_type'))
+    setUserType(await AsyncStorage.getItem('user_type'))
+ }
+
+
   const getUserPostData = async  () =>{
     setIsLoading(true)
-    const response = await getUserPost(0, offset)
+    const response = userType === "1" ?  await getUserPost("0,1,2", offset) :  await getUserPost("0", offset);
     if (response && response?.data?.length > 0) {
         //After the response increasing the offset for the next API call.
         setPost([...response.data]);
@@ -33,10 +43,17 @@ function Pending() {
   const loadMoreItem = async () => {
     setOffset(offset + 10);
     if(offset > 10){
-    const response = await getUserPost(0, offset)
+      const response = userType === "1" ?  await getUserPost("0,1,2", offset) :  await getUserPost("0", offset);
     if (response && response?.data?.length > 0) {
         //After the response increasing the offset for the next API call.
-        setPost([...post, ...response.data]);
+        
+        if (post.length > 10) {
+          setPost([...post, ...response.data]);
+      } else {
+          return;
+      }
+
+        
     }else{
       return;
     }

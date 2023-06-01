@@ -32,6 +32,7 @@
     "react-native-pager-view": "^6.1.4",
     "react-native-paper": "^5.3.1",
     "react-native-pell-rich-editor": "^1.8.9",
+    "react-native-render-html": "^6.3.4",
     "react-native-safe-area-context": "^3.4.1",
     "react-native-screens": "^3.20.0",
     "react-native-snap-carousel": "^3.9.1",

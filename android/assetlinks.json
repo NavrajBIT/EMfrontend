@@ -1,0 +1,10 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "com.eastmojo_app",
+      "package_name": "com.eastmojo_app",
+      "sha256_cert_fingerprints":
+      ["65:04:93:C4:54:6A:ED:0F:E0:03:B5:03:95:28:A2:AD:5F:38:4B:72:5B:96:3E:49:6C:68:1D:C3:D0:FC:96:E3"]
+    }
+  }]
+  
