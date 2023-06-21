@@ -47,9 +47,11 @@ function Verification({ navigation, route }) {
   //function to verify the OTP
   const handleVerifyOtp = async () => {
     const formData = new FormData();
+
     formData.append('otp', otp);
     formData.append('phone_number', `+91${route.params.number}`);
     let response = await verifyOtp(formData);
+    console.log(response)
     if (response && response.data?.token) {
       await AsyncStorage.setItem('token', response?.data?.token);
       await AsyncStorage.setItem(
@@ -86,8 +88,8 @@ function Verification({ navigation, route }) {
     );
 
     let data = await response.json();
+    setIsLoading(false);
     if (data && data?.data?.otp_sent === true) {
-      setIsLoading(false);
       ToastAndroid.show('OTP sent...', ToastAndroid.LONG);
     } else {
       ToastAndroid.show(data.message, ToastAndroid.LONG);

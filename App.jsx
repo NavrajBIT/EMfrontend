@@ -17,8 +17,19 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { CategoryContextProvider } from './src/context/categoryContext';
 import NetInfo from '@react-native-community/netinfo';
 // import linking from './src/utils/linking';
+import * as Sentry from "@sentry/react-native";
+
+Sentry.init({
+  dsn: "https://a29ae6ae36804511a165bc79e9c0b55a@o4505396038926336.ingest.sentry.io/4505396181598208",
+  // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+  // We recommend adjusting this value in production.
+  tracesSampleRate: 1.0,
+});
+
+
 
 function App() {
+
 
 
   const linking = {
@@ -109,4 +120,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Sentry.wrap(App);

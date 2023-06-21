@@ -35,7 +35,6 @@ const PostDetails = ({ navigation, route }) => {
   const [postMessage, setPostMessage] = useState("")
   const [statusLoading, setStatusLoading] = useState(false)
   const videoRef = useRef(null)
-
   useEffect(() => {
     getPostDetails()
   }, [isCommented])
@@ -53,6 +52,8 @@ const PostDetails = ({ navigation, route }) => {
       setPostFiles(response?.data?.display_files)
     }
   }
+
+
 
   const commentPost = async () => {
     const response = await commentApi(route?.params?.data?.id, comment)
@@ -74,7 +75,6 @@ const PostDetails = ({ navigation, route }) => {
     formData.append('status', status)
     formData.append("status_message", status_message)
     const response = await verifyPost(route?.params?.data?.id, formData)
-    console.log(response)
     setStatusLoading(false)
     if (response.status === 200) {
       ToastAndroid.show(response?.message, ToastAndroid.LONG)
@@ -134,6 +134,8 @@ const PostDetails = ({ navigation, route }) => {
     setVerifiedDocument(tempData)
   }
 
+  // let postContent = postDetails?.content?.replace(/<article>(.*?)<\/article>/g
+
 
   async function handleUserNavigation() {
     let token = await AsyncStorage.getItem('token')
@@ -143,6 +145,15 @@ const PostDetails = ({ navigation, route }) => {
       navigation.navigate('CreatePost')
     }
   }
+
+  const renderNode = (node, index, siblings, parent, defaultRenderer) => {
+    if (node.name === 'article') {
+      console.log('working');
+      // Return null to prevent rendering the element
+      return null;
+    }
+    return defaultRenderer(node.children, parent);
+  };
   
 
   if (loading) {
@@ -257,7 +268,9 @@ const PostDetails = ({ navigation, route }) => {
           color: 'black'
         }}>{postDetails?.description}</Text>
       </View>
-      {postDetails?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={postDetails?.content} stylesheet={styles} /></View>}
+      {postDetails?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={postDetails?.content} stylesheet={styles} 
+      renderNode={renderNode}
+      /></View>}
       <View style={{ paddingHorizontal: 20 }}>
         {
           postFiles.length > 0 && postFiles.map((el, index) => {
@@ -542,5 +555,9 @@ const styles = StyleSheet.create({
   },
   p: {
     color: 'black'
+  },
+  article:{
+    display:'none',
+    backgroundColor:'red'
   }
 })

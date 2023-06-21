@@ -21,7 +21,7 @@ const CreatPostIcons = ({ data }) => {
     }
 
     return (
-        <TouchableOpacity onPress={() => handleNavigation()}
+        <TouchableOpacity onPress={handleNavigation}
         >
             <Box w="170" rounded="lg" overflow="hidden" mr="4"
                 h="170"
