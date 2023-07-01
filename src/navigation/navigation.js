@@ -1,7 +1,7 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
-import Image from 'react-native'
+import {Linking, Image} from 'react-native'
 import Login from '../screens/Login';
 import BackButton from '../components/Button/BackButton';
 import Verification from '../screens/Verification';
@@ -20,7 +20,43 @@ import TopNewsPostDetails from '../screens/TopNewsPostDetails';
 const Stack = createNativeStackNavigator()
 
 const Navigation = () => {
-      const {login} = useContext(AuthContext)
+
+
+    const {login} = useContext(AuthContext)
+    const navigation = useNavigation();
+
+    const handleDeepLink = (event) => {
+        console.log(event)
+         let url =  event?.url;
+         let finalUrl = url.split("/")
+         console.log(finalUrl)
+    
+    
+        if (finalUrl[3] === 'post_details') {
+          navigation.navigate('PostDetails', {
+            data:{
+               id: finalUrl[4]
+            }
+          })
+          // Navigate to the blog post screen using the postId
+          // Add your navigation logic here
+        }
+      };
+    
+      // Register the event listener for deep linking
+      useEffect(() => {
+        Linking.addEventListener('url', handleDeepLink);
+    
+        // Clean up the event listener on component unmount
+        return () => {
+          Linking.removeEventListener('url', handleDeepLink);
+        };
+      }, []);
+    
+    
+    
+
+
     return (
         <Stack.Navigator>
             <Stack.Screen name="Home" component={HomeScreen}

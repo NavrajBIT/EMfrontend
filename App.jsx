@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 
   StyleSheet,
@@ -16,11 +16,14 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { CategoryContextProvider } from './src/context/categoryContext';
 import NetInfo from '@react-native-community/netinfo';
+import { useNavigation } from '@react-navigation/native';
 // import linking from './src/utils/linking';
 import * as Sentry from "@sentry/react-native";
 
 Sentry.init({
   dsn: "https://a29ae6ae36804511a165bc79e9c0b55a@o4505396038926336.ingest.sentry.io/4505396181598208",
+  enableNative: true,
+  enableNativeCrashHandling: true,
   // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
   // We recommend adjusting this value in production.
   tracesSampleRate: 1.0,
@@ -31,10 +34,24 @@ Sentry.init({
 function App() {
 
 
+  
+
+  const config = {
+    screens: {
+      PostDetails: 'post_details/:id',
+      TopNewsPostDetails: 'topnews/:id',
+    },
+  };
 
   const linking = {
-    prefixes: ['peoplesapp://']
+    prefixes: ['eastmojo_app://', 'https://eastmojo.oneggy.com'],
+    config
   };
+
+
+
+  
+  
 
 
   const [isOnline, setIsOnline] = useState(true);

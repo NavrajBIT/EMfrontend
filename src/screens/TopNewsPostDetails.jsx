@@ -161,8 +161,8 @@ const TopNewsPostDetails = ({ navigation, route }) => {
 
   const renderersProps = {
     a: {
-      onPress: () => { }, // Empty onPress handler to disable the link functionality
-      selectable: false, // Disable text selection on anchor tags
+      // onPress: () => { }, // Empty onPress handler to disable the link functionality
+      // selectable: false, // Disable text selection on anchor tags
       style: { textDecorationLine: 'none' }, // Remove text underline style
     },
   };

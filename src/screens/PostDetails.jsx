@@ -1,4 +1,5 @@
-import { Text, ScrollView, View, Pressable, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
+import { Text, ScrollView, View, Pressable, Linking,
+  Share, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/Entypo'
 import { PRIMARY_COLOR } from '../styles/style'
@@ -47,6 +48,7 @@ const PostDetails = ({ navigation, route }) => {
     const response = await getPostById(route?.params?.data?.id);
     setIsLoading(false)
     if (response.status === 200) {
+      console.log(response)
       setCommentList(response?.data?.comments)
       setPostDetails(response?.data)
       setPostFiles(response?.data?.display_files)
@@ -134,7 +136,39 @@ const PostDetails = ({ navigation, route }) => {
     setVerifiedDocument(tempData)
   }
 
-  // let postContent = postDetails?.content?.replace(/<article>(.*?)<\/article>/g
+  const handleShare = () => {
+    const deepLink = 'eastmojo_app://PostDetails'; // Custom deep link URL for the Settings page
+    const shareUrl = getShareUrl();
+    shareContent(shareUrl);
+  };
+
+  const getShareUrl = () => {
+    return `eastmojo_oneggy.com/post_details/${postDetails?.id}`;
+  };
+
+  const shareContent = (shareUrl) => {
+    onShare(shareUrl)
+  };
+
+  const onShare = async (url) => {
+    try {
+      const result = await Share.share({
+        message:url
+          
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  }
 
 
   async function handleUserNavigation() {
@@ -154,7 +188,7 @@ const PostDetails = ({ navigation, route }) => {
     }
     return defaultRenderer(node.children, parent);
   };
-  
+
 
   if (loading) {
     return <SafeAreaView>
@@ -205,7 +239,7 @@ const PostDetails = ({ navigation, route }) => {
         </View>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%', marginTop: 10 }}>
-        <View style={{ paddingHorizontal: 50, marginTop: 10, width:'70%' }}>
+        <View style={{ paddingHorizontal: 50, marginTop: 10, width: '70%' }}>
           <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.created_at) || "#NA#"}</Text>
           <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.user?.name || "#NA#"}`}</Text></Text>
         </View>
@@ -217,13 +251,13 @@ const PostDetails = ({ navigation, route }) => {
               textAlign: 'center'
             }}>{postDetails?.likes || "0"}</Text>
           </View>
-          <View>
+          <TouchableOpacity onPress={handleShare}>
             <Icon name="share" size={25} color={PRIMARY_COLOR} />
             <Text style={{
               fontSize: 10, color: PRIMARY_COLOR,
               textAlign: 'center'
             }}>{postDetails?.shares || "0"}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
       {postDetails?.status === 4 && <View style={{ paddingHorizontal: 30, marginVertical: 15 }}>
@@ -268,8 +302,8 @@ const PostDetails = ({ navigation, route }) => {
           color: 'black'
         }}>{postDetails?.description}</Text>
       </View>
-      {postDetails?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={postDetails?.content} stylesheet={styles} 
-      renderNode={renderNode}
+      {postDetails?.content && <View style={{ paddingHorizontal: 30, marginTop: 30 }}><HTMLView value={postDetails?.content} stylesheet={styles}
+        renderNode={renderNode}
       /></View>}
       <View style={{ paddingHorizontal: 20 }}>
         {
@@ -332,7 +366,7 @@ const PostDetails = ({ navigation, route }) => {
               <Icon name="thumbs-up" size={30} color={PRIMARY_COLOR} />
             </Button>
             <Button variant="outline" width={"45%"}
-              onPress={() => likeSharePost('share')}
+              onPress={handleShare}
               style={{
                 borderWidth: 1, borderColor: PRIMARY_COLOR
               }}>
@@ -556,8 +590,8 @@ const styles = StyleSheet.create({
   p: {
     color: 'black'
   },
-  article:{
-    display:'none',
-    backgroundColor:'red'
+  article: {
+    display: 'none',
+    backgroundColor: 'red'
   }
 })
