@@ -1,10 +1,10 @@
 var decode = require('decode-html')
-import { Text, ScrollView, View, Pressable, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
+import { Text, ScrollView, View, Pressable,Share, Alert, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import Icon from 'react-native-vector-icons/Entypo'
 import { PRIMARY_COLOR } from '../styles/style'
 import { Input, Menu, CheckIcon, TextArea, FormControl, WarningOutlineIcon, Box, Center, NativeBaseProvider, Divider, Image, Button, Popover, Checkbox } from 'native-base'
-import { commentApi, getPostById, verifyPost } from '../services/api'
+import { commentApi, getPostById, getRecentNews, getRecentNewsDetails, verifyPost } from '../services/api'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { handleDate } from '../utils'
 import { env } from '../../env'
@@ -39,10 +39,26 @@ const TopNewsPostDetails = ({ navigation, route }) => {
   const [statusLoading, setStatusLoading] = useState(false)
   const videoRef = useRef(null)
 
-  useEffect(() => {
-    getPostDetails()
-  }, [isCommented])
-  let data = route.params.data;
+  // useEffect(() => {
+  //   getPostDetails()
+  // }, [isCommented])
+
+
+  useEffect(() =>{
+    getPostDetailsById()
+  }, [])
+
+  const getPostDetailsById = async () =>{
+    setIsLoading(true)
+    const response = await getRecentNewsDetails(route?.params?.data?.id);
+    if (response) {
+      console.log(response,"response")
+      setCommentList([])
+      setPostDetails(response)
+      setPostFiles([])
+      setIsLoading(false)
+    }
+  }
 
 
   const getPostDetails = async () => {
@@ -157,7 +173,6 @@ const TopNewsPostDetails = ({ navigation, route }) => {
   }
 
 
-  console.log(data?.content)
 
   const renderersProps = {
     a: {
@@ -173,6 +188,44 @@ const TopNewsPostDetails = ({ navigation, route }) => {
   },
   
 };
+
+//Sharing the post 
+  const handleShare = () => {
+    const deepLink = 'eastmojo_app://PostDetails'; // Custom deep link URL for the Settings page
+    const shareUrl = getShareUrl();
+    shareContent(shareUrl);
+  };
+
+  const getShareUrl = () => {
+    return `app.eastmojoconnect.com/topnews/${route?.params?.data?.id}`;
+  };
+
+  const shareContent = (shareUrl) => {
+    onShare(shareUrl)
+  };
+
+  const onShare = async (url) => {
+    try {
+      const result = await Share.share({
+        message:url
+          
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          ToastAndroid.show("Shared", ToastAndroid.CENTER, ToastAndroid.LONG)
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        ToastAndroid.show("Cancelled", ToastAndroid.CENTER, ToastAndroid.LONG)
+        // dismissed
+      }
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  }
+
 
 
   if (loading) {
@@ -212,14 +265,14 @@ const TopNewsPostDetails = ({ navigation, route }) => {
             <Icon name="chevron-left" size={30} color={PRIMARY_COLOR} />
           </TouchableOpacity>
           <Box >
-            <HTMLView value={`<p>${data?.title}</p>`} stylesheet={titlestyles} />
+            <HTMLView value={`<p>${postDetails?.title?.rendered}</p>`} stylesheet={titlestyles} />
           </Box>
         </View>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%', marginTop: 10 }}>
         <View style={{ paddingHorizontal: 50, marginTop: 10, width: '70%' }}>
-          <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(data?.date) || "#NA#"}</Text>
-          <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{data?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${data?.author || "#NA#"}`}</Text></Text>
+          <Text style={{ color: PRIMARY_COLOR, fontWeight: '400' }}>{handleDate(postDetails?.date) || "#NA#"}</Text>
+          <Text style={{ color: 'rgba(0,0,0,0.4)' }}>{postDetails?.location || "#NA#"} <Icon name="dot-single" size={15} /><Text>{`${postDetails?.author || "#NA#"}`}</Text></Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
           <View style={{ marginRight: 10 }}>
@@ -265,8 +318,8 @@ const TopNewsPostDetails = ({ navigation, route }) => {
           </Menu.Item>
         </Menu>
       </View>}
-      {data && data?.image && <Image
-        source={{ uri: `${data?.image.split('.jpg')[0]}.jpg` }}
+      {postDetails && postDetails?.yoast_head_json?.og_image && <Image
+        source={{ uri: `${postDetails?.yoast_head_json?.og_image[0].url.split('.jpg')[0]}.jpg` }}
         style={{ width: "100%", height: 200, marginTop: 10 }}
         alt=""
       />}
@@ -278,9 +331,9 @@ const TopNewsPostDetails = ({ navigation, route }) => {
         <Text style={{
           marginLeft: 10, fontWeight: '500',
           color: 'black'
-        }}>{data?.description}</Text>
+        }}>{postDetails?.yoast_head_json?.og_description}</Text>
       </View>
-      {data && data?.content && <ScrollView style={{ paddingHorizontal: 30, marginTop: 30 }}><RenderHtml source={{ html: removeSpecificCharacters(decode(data?.content)) }}
+      {postDetails && postDetails?.content && <ScrollView style={{ paddingHorizontal: 30, marginTop: 30 }}><RenderHtml source={{ html: removeSpecificCharacters(decode(postDetails?.content.rendered)) }}
       tagsStyles={tagsStyles}
         renderersProps={renderersProps}
       /></ScrollView>}
@@ -326,10 +379,10 @@ const TopNewsPostDetails = ({ navigation, route }) => {
           color: 'black',
           marginLeft: 15,
           fontSize: 16
-        }}>{data?.author || "#NA#"}</Text>
+        }}>{postDetails?.author || "#NA#"}</Text>
 
       </View>
-      {(postDetails?.status === 1 || postDetails?.status === 3) &&
+      {
         <>
           <View style={{
             flexDirection: 'row',
@@ -345,7 +398,7 @@ const TopNewsPostDetails = ({ navigation, route }) => {
               <Icon name="thumbs-up" size={30} color={PRIMARY_COLOR} />
             </Button>
             <Button variant="outline" width={"45%"}
-              onPress={() => likeSharePost('share')}
+              onPress={handleShare}
               style={{
                 borderWidth: 1, borderColor: PRIMARY_COLOR
               }}>

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
@@ -38,8 +39,13 @@ const Navigation = () => {
                id: finalUrl[4]
             }
           })
-          // Navigate to the blog post screen using the postId
-          // Add your navigation logic here
+        }
+         else if(finalUrl[3] === 'topnews'){
+            navigation.navigate('TopNewsPostDetails', {
+                data:{
+                   id: finalUrl[4]
+                }
+              })
         }
       };
     

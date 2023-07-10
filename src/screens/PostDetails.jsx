@@ -143,7 +143,7 @@ const PostDetails = ({ navigation, route }) => {
   };
 
   const getShareUrl = () => {
-    return `eastmojo_oneggy.com/post_details/${postDetails?.id}`;
+    return `app.eastmojoconnect.com/post_details/${postDetails?.id}`;
   };
 
   const shareContent = (shareUrl) => {
@@ -158,11 +158,13 @@ const PostDetails = ({ navigation, route }) => {
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
+          ToastAndroid.show("Shared", ToastAndroid.CENTER, ToastAndroid.LONG)
           // shared with activity type of result.activityType
         } else {
           // shared
         }
       } else if (result.action === Share.dismissedAction) {
+        ToastAndroid.show("Cancelled", ToastAndroid.CENTER, ToastAndroid.LONG)
         // dismissed
       }
     } catch (error) {

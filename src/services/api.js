@@ -255,5 +255,21 @@ export const getRecentNews = async ( id,perPage, page) =>{
   }  
 }
 
+export const getRecentNewsDetails = async (id) =>{
+  console.log(id, 'id')
+  
+  let url = `https://www.eastmojo.com/wp-json/wp/v2/posts/${id}`
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }  
+}
+
+
 
 

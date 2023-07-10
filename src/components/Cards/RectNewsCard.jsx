@@ -17,7 +17,9 @@ const RectNewsCard = ({data}) => {
         let token = await AsyncStorage.getItem('token')
         if (token) {
             navigation.navigate('TopNewsPostDetails', {
-                data: data
+                data: {
+                    id: data?.id
+                }
             })
         } else {
             navigation.navigate('Login')
