@@ -267,9 +267,92 @@ export const getRecentNewsDetails = async (id) =>{
     return data;
   } catch (error) {
     return error;
-  }  
-}
+  }
+};
+
+
+export const eastmojoComment = async (id) => {
+  try {
+    const response = await fetch(`${env.url}/post/wordpress/comment/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${await AsyncStorage.getItem('token')}`,
+      },
+      // body: JSON.stringify({content}),
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const postEastmojoComment = async (id, comment) => {
+  try {
+    const response = await fetch(`${env.url}/post/wordpress/comment/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${await AsyncStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({'comment':comment}),
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const likeEastmojoComment = async (id, type) => {
+  try {
+    const response = await fetch(`${env.url}/post/wordpress/reaction/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${await AsyncStorage.getItem('token')}`,
+        
+      },
+      body:JSON.stringify({type})
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
 
 
 
+export const getEastmojoLikesList = async (id, type) => {
+  try {
+    const response = await fetch(`${env.url}/post/wordpress/reaction/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${await AsyncStorage.getItem('token')}`,
+        
+      },
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
 
+export const deleteCurrentUser = async () => {
+  try {
+    const response = await fetch(`${env.url}/auth/delete/user`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Token ${await AsyncStorage.getItem('token')}`,
+      },
+    });
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }
+};

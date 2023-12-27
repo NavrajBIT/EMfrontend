@@ -1,6 +1,6 @@
-import { Image, Text, TextArea, View, Menu, Pressable, Button } from 'native-base'
+import { Image, Text, TextArea, View, Menu, Pressable, Button, } from 'native-base'
 import React, { useState, useEffect, useLayoutEffect } from 'react'
-import { useWindowDimensions, Dimensions, TouchableOpacity, ToastAndroid } from 'react-native';
+import { useWindowDimensions, Dimensions, TouchableOpacity, Linking, ToastAndroid, StyleSheet, Alert, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { PRIMARY_COLOR } from '../../styles/style';
@@ -8,7 +8,7 @@ import CustomButton from '../../components/Button/Button';
 import Posted from '../post_screens/Posted';
 import Rejected from '../post_screens/Rejected';
 import Pending from '../post_screens/Pending';
-import { getProfileData } from '../../services/api';
+import { deleteCurrentUser, getProfileData } from '../../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from '../Login';
 import { env } from '../../../env';
@@ -17,6 +17,7 @@ import { env } from '../../../env';
 function Profile({ navigation }) {
 
     const [profileData, setProfileData] = useState([])
+    const [modalVisible, setModalVisible] = useState(false);
     const getUserData = async () => {
         const response = await getProfileData();
         if (response.status === 200 && response?.data) {
@@ -46,6 +47,15 @@ function Profile({ navigation }) {
         }
     }
 
+    async function deleteUser() {
+        const response = await deleteCurrentUser();
+        if (response.status === true){
+            ToastAndroid.show('User Deleted Successfully', ToastAndroid.LONG)
+            await AsyncStorage.removeItem('token');
+            navigation.navigate('Login');
+
+        }
+    }
 
     const renderTabBar = props => (
         <View style={{
@@ -106,6 +116,57 @@ function Profile({ navigation }) {
             flex: 1,
             backgroundColor: 'white'
         }}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalVisible(!modalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={{
+                            fontSize:16, 
+                            fontWeight:'500',
+                            color:PRIMARY_COLOR
+                        }}>Are you sure you want to delete it?</Text>
+                        <Text style={{
+                            color:'gray',
+                            fontSize:11, marginTop:2, marginBottom:10,
+                        }}>You can't revert your data or contributions after deletion.</Text>
+                        <View style={{
+                        flexDirection:'row',
+                        justifyContent:'space-between',
+                        alignItems:'center'
+                        }}>
+                            <Pressable
+                                style={{
+                                    borderWidth:1,
+                                    borderColor:PRIMARY_COLOR,
+                                    borderRadius:10,
+                                    paddingHorizontal:10, paddingVertical :2,
+                                    marginRight:20   
+                                }}
+                                onPress={deleteUser}>
+                                <Text style={{
+                                     color:PRIMARY_COLOR,
+                                }}>Confirm</Text>
+                            </Pressable>
+                            <Pressable
+                                  style={{
+                                    borderWidth:1,
+                                    borderColor:'black',
+                                    borderRadius:10,
+                                    paddingHorizontal:10, paddingVertical :2,
+                                }}
+                                onPress={() => setModalVisible(!modalVisible)}>
+                                <Text style={styles.textStyle}>Cancel</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             <View style={{ paddingHorizontal: 30 }}>
                 <View style={{
                     width: '100%', backgroundColor: 'white',
@@ -133,7 +194,7 @@ function Profile({ navigation }) {
                         <View style={{
                             marginLeft: 15,
                             paddingVertical: 5,
-                            width:'70%'
+                            width: '70%'
                         }}>
                             <Text style={{
                                 fontSize: 20,
@@ -166,10 +227,13 @@ function Profile({ navigation }) {
                         })}>
                             Edit Profile
                         </Menu.Item>
-                        <Menu.Item>About Us</Menu.Item>
+                        <Menu.Item onPress={() => Linking.openURL('https://www.eastmojo.com/about-us/')}>About Us</Menu.Item>
+                        <Menu.Item onPress={() => setModalVisible(true)}>
+                            Delete my Account
+                        </Menu.Item>
                         <Menu.Item>
                             <Button
-                                style={{ width: '100%', marginTop: 30, borderWidth: 1, borderColor: PRIMARY_COLOR }}
+                                style={{ width: '100%', marginTop: 10, borderWidth: 1, borderColor: PRIMARY_COLOR }}
                                 size="sm"
                                 _text={{
                                     color: PRIMARY_COLOR
@@ -199,6 +263,34 @@ function Profile({ navigation }) {
         </View>
     </>
     );
+
 }
 
+const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        width:"80%",
+        backgroundColor: 'white',
+        borderRadius: 20,
+        paddingHorizontal: 20,
+        paddingVertical:20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+})
+
 export default Profile
+
