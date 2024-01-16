@@ -123,6 +123,7 @@ function HomeScreen({navigation}) {
               </TouchableOpacity>
             ))}
         </ScrollView>
+        <Text>asdfsdf</Text>
         <Pressable onPress={async () => handleCategoryNavigation()}>
           <Icon
             name="dots-three-vertical"
